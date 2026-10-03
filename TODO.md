@@ -21,12 +21,14 @@ Plan de travail priorisé pour préparer la démo Hack-Nation, puis faire évolu
   - Implémenter un enum `AppLanguage { en, yo }` ; stocker la sélection locale dans le state global ou le service de configuration.
   - Faire passer la langue à l'interface, aux prompts système, au texte du patient, aux messages de fallback et aux libellés de l'app.
   - Gérer le cas sans connexion et le cas connecté avec un comportement explicite en fonction de la langue choisie.
+  - [x] Première tranche : sélecteur sur l'écran des scénarios ; Yorùbá sélectionne le parcours hors ligne et n'utilise pas Gecko ni Gemini Live.
 
 - [ ] 2. Introduire un modèle de contenu par langue pour les scénarios.
   - Fichiers : `lib/services/patient_scenario.dart`, `lib/services/offline/offline_scenarios.dart`, éventuellement `lib/services/lang/yoruba_scenario_data.dart` ou des JSON dédiés.
   - Ajouter un champ `language` / `locale` sur les scénarios.
   - Séparer le `title`, la description, le `systemPrompt`, les points clés, les réponses du patient, et les messages UI selon les langues disponibles.
   - Ne pas exposer le diagnostic dans le titre affiché ; garder le texte neutre et localisé.
+  - [x] Premier scénario localisé en Yorùbá : fièvre chez l'enfant, avec QCM, signes d'alerte, score et récapitulatif localisés. Brouillon à relire par l'équipe.
 
 - [ ] 3. Mettre en place le matcher lexical yoruba hors ligne avec normalisation des diacritiques.
   - Fichiers : nouveau `lib/services/lang/yoruba_normalizer.dart`, `lib/services/offline/offline_patient_brain.dart`, `lib/services/offline/offline_text_match.dart`.
@@ -35,6 +37,7 @@ Plan de travail priorisé pour préparer la démo Hack-Nation, puis faire évolu
   - Ajouter des variantes de mots-clés et des paraphrases écrites à la main pour le yoruba.
   - Garder Gecko/embedding seulement pour l'anglais ; ne pas l'affirmer comme solution yoruba.
   - [x] Première fondation : normaliseur des lettres yoruba précomposées et combinantes, branché au matcher lexical ; tests avec et sans diacritiques dans `test/yoruba_normalizer_test.dart`.
+  - [x] Ajouter un premier lexique yoruba (avec mots souvent employés en anglais) et un fallback en cas d'égalité ambiguë ; tests dans `test/offline_yoruba_test.dart`.
 
 - [ ] 4. Implémenter le fail-safe visible et non ambigu.
   - Fichiers : `lib/services/offline/offline_patient_brain.dart`, `lib/screens/simulation_screen.dart`.
@@ -42,24 +45,29 @@ Plan de travail priorisé pour préparer la démo Hack-Nation, puis faire évolu
   - Afficher un message explicite du type : « Pas sûr — reformulez ou demandez à un formateur. »
   - Ajouter la version yoruba relue par un natif, avec label de statut : "non vérifié" si le texte n'a pas été validé.
   - S'assurer que le score ne crédite pas un point non réellement couvert.
+  - [x] Premier fallback yoruba visible dans la conversation et par notification ; les correspondances lexicales à égalité ne valident aucun point.
 
 - [ ] 5. Marquer le contenu yoruba comme brouillon/à valider avant diffusion.
   - Fichiers : `lib/services/offline/offline_scenarios.dart`, `docs/DATA_SOURCES.md`, `README.md`.
   - Ajouter un statut ou une note visible dans l'UI : « contenu yoruba en relecture / non vérifié ».
   - Ne pas présenter les textes comme validés cliniquement tant qu'une relecture native n'a pas eu lieu.
   - Documenter les limites de couverture linguistique et clinique.
+  - [x] Avertissement brouillon affiché au choix du scénario et au récapitulatif ; README mis à jour. La relecture linguistique reste à faire.
 
-- [ ] 6. Ajouter le mini-benchmark de validation pour comparer mots-clés vs sémantique, anglais vs yoruba.
+- [ ] 6. Compléter le mini-benchmark comparatif mots-clés / sémantique et anglais / yoruba.
   - Fichiers : nouveau `docs/EVALUATION.md`, `test/` (ou `test/data` selon l'organisation actuelle).
   - Créer des jeux de cas positifs, paraphrases, questions courtes, répétitions, cas négatifs et hors-sujet.
   - Tester le même scénario en anglais et en yoruba.
   - Conserver un petit tableau de résultats reproductibles ; le brancher dans l'évaluation de la démo.
+  - [x] Première mesure limitée : 18 cas yoruba écrits par l'équipe ; matcher lexical 12/12 positifs, 5/5 abstentions négatives et 1/1 répétition. Voir `docs/EVALUATION.md`.
+  - [ ] Faire relire/enrichir les cas par des locuteurs yoruba puis mesurer la comparaison anglaise et Gecko séparément.
 
-- [ ] 7. Ajouter le fichier de sources et de limites des données.
+- [ ] 7. Compléter le fichier de sources et de limites des données.
   - Fichier : nouveau `docs/DATA_SOURCES.md`.
   - Décrire : origine, source, licence, taille, usage, limites, et ce qu'il ne couvre pas.
   - Ajouter les références du brief et les données candidates pour le problème et le contexte de santé.
   - Indiquer clairement la limite d'usage : ce n'est pas une preuve clinique validée.
+  - [x] Documenter les ressources effectivement utilisées et signaler les références locales/cliniques qui restent à choisir.
 
 - [ ] 8. Rendre le nom affiché cohérent avec le brief et la démo.
   - Fichiers : `README.md`, `lib/main.dart`, `android/app/src/main/AndroidManifest.xml`, `ios/Runner/Info.plist`, `pubspec.yaml`.
@@ -107,6 +115,12 @@ Plan de travail priorisé pour préparer la démo Hack-Nation, puis faire évolu
 - [ ] 16. Vérifier le TTS embarqué yoruba uniquement si une personne native a validé la qualité ; sinon rester sur le préenregistré.
 - [ ] 17. Préparer la reconnaissance vocale yoruba hors ligne comme une limite de la version actuelle, sans la promettre.
 - [ ] 18. Ajouter un vrai flux de test de comparaison Gemini Live vs Claude sur les mêmes questions yoruba.
+- [ ] 19. Évaluer la faisabilité du STT hors ligne sur téléphone, en anglais et en yoruba.
+  - Inventorier les moteurs STT disponibles sur les appareils cibles et leurs langues installées.
+  - Vérifier si chaque moteur prend en charge une reconnaissance réellement sur l'appareil (`onDevice`) pour `en_US` et Yorùbá ; ne pas déduire le support de la seule présence d'une locale.
+  - Tester des enregistrements de locuteurs, comparer les transcriptions attendues, et consigner appareil, moteur, langue et latence.
+  - Garder la saisie texte comme solution de repli si la langue ou le mode hors ligne ne sont pas pris en charge.
+  - Ne promettre la fonctionnalité qu'après tests sur les appareils ciblés et relecture des transcriptions Yorùbá.
 
 ### Ordre de mise en œuvre recommandé
 

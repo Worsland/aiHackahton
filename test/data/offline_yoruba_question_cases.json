@@ -1,0 +1,113 @@
+{
+  "language": "yo",
+  "scenarioId": "fever_child",
+  "description": "Échantillon de benchmark rédigé par l'équipe pour le prototype. Formulations à faire relire par une personne yorubaphone; ce n'est pas un jeu représentatif.",
+  "cases": [
+    {
+      "id": "duration_tones",
+      "type": "positive",
+      "question": "Ọjọ́ mélòó ni ọmọ náà ti ń ṣe ibà?",
+      "expectedKeyPointId": "duree"
+    },
+    {
+      "id": "duration_no_tones",
+      "type": "positive",
+      "question": "Ojo meloo ni omo naa ti n se iba?",
+      "expectedKeyPointId": "duree"
+    },
+    {
+      "id": "duration_short",
+      "type": "positive",
+      "question": "Ìgbà wo ni ibà bẹ̀rẹ̀?",
+      "expectedKeyPointId": "duree"
+    },
+    {
+      "id": "net_tones",
+      "type": "positive",
+      "question": "Ṣé ọmọ náà ń sùn lábẹ́ àwọ̀n ẹ̀fọn?",
+      "expectedKeyPointId": "moustiquaire"
+    },
+    {
+      "id": "net_no_tones",
+      "type": "positive",
+      "question": "Se omo naa n sun labe awon efon?",
+      "expectedKeyPointId": "moustiquaire"
+    },
+    {
+      "id": "net_english_term",
+      "type": "positive",
+      "question": "Ṣé ó ní mosquito net?",
+      "expectedKeyPointId": "moustiquaire"
+    },
+    {
+      "id": "travel_tones",
+      "type": "positive",
+      "question": "Ṣé ẹ ti rìnrìn àjò lọ sí ibòmíì láìpẹ́?",
+      "expectedKeyPointId": "voyage"
+    },
+    {
+      "id": "travel_english_term",
+      "type": "positive",
+      "question": "Ṣé ẹ ti travel lọ sí ìlú mìíràn?",
+      "expectedKeyPointId": "voyage"
+    },
+    {
+      "id": "symptoms_fits",
+      "type": "positive",
+      "question": "Ṣé ó ní ìgbagbogbo tàbí convulsion?",
+      "expectedKeyPointId": "autres_symptomes"
+    },
+    {
+      "id": "symptoms_sleep",
+      "type": "positive",
+      "question": "Ṣé ó ń sùn ju bó ṣe yẹ lọ?",
+      "expectedKeyPointId": "autres_symptomes"
+    },
+    {
+      "id": "hydration_tones",
+      "type": "positive",
+      "question": "Ṣé ó ṣì ń mu omi àti jẹun?",
+      "expectedKeyPointId": "hydratation"
+    },
+    {
+      "id": "hydration_no_tones",
+      "type": "positive",
+      "question": "Se o n mu omi?",
+      "expectedKeyPointId": "hydratation"
+    },
+    {
+      "id": "unrelated_breakfast",
+      "type": "negative",
+      "question": "Kí ni o jẹ fún oúnjẹ àárọ̀?"
+    },
+    {
+      "id": "unrelated_weather",
+      "type": "negative",
+      "question": "Ojú-ọjọ́ rí báwo lónìí?"
+    },
+    {
+      "id": "greeting",
+      "type": "negative",
+      "question": "Ẹ káàárọ̀, ṣé àlàáfíà ni?"
+    },
+    {
+      "id": "empty",
+      "type": "negative",
+      "question": ""
+    },
+    {
+      "id": "repeat_duration",
+      "type": "repeat",
+      "setupQuestions": [
+        "Ọjọ́ mélòó ni ọmọ náà ti ń ṣe ibà?"
+      ],
+      "question": "Ìgbà wo ni ibà bẹ̀rẹ̀?",
+      "expectedKeyPointId": "duree"
+    },
+    {
+      "id": "ambiguous",
+      "type": "negative",
+      "question": "Ìgbà àti ìlú?"
+    }
+  ]
+}

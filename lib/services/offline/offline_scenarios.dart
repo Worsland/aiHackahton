@@ -1,4 +1,5 @@
 import 'offline_patient_brain.dart';
+import '../lang/app_language.dart';
 import '../../widgets/patient_avatar.dart' show PatientLook;
 import '../scenario_catalog.dart';
 
@@ -135,6 +136,131 @@ class OfflineScenarios {
       management:
           'Refer to a health facility for a rapid test without delay. '
           'Emergency if drowsiness, convulsions, or refusal to drink appear.',
+    ),
+  );
+
+  static const yorubaFeverChild = OfflineScenario(
+    title: 'Fièvre chez un enfant',
+    language: AppLanguage.yoruba,
+    look: PatientLook.womanMature,
+    keyPoints: [
+      KeyPoint(
+        id: 'duree',
+        label: 'Beere iye ọjọ́ tí ibà ti fi wà',
+        keywords: [
+          'ọjọ́ mélòó',
+          'ìgbà wo',
+          'ibà ti pẹ́',
+          'ìgbà',
+          'how many days',
+          'how long',
+        ],
+        examples: ['Ọjọ́ mélòó ni ọmọ náà ti ń ṣe ibà?'],
+        reply: 'Ọjọ́ méjì ni, ibà náà kò tíì lọ.',
+      ),
+      KeyPoint(
+        id: 'moustiquaire',
+        label: 'Beere bóyá ọmọ náà ń sùn lábẹ́ àwọ̀n ẹ̀fọn',
+        keywords: [
+          'àwọ̀n ẹ̀fọn',
+          'ẹ̀fọn',
+          'mosquito net',
+          'bed net',
+        ],
+        examples: ['Ṣé ọmọ náà ń sùn lábẹ́ àwọ̀n ẹ̀fọn?'],
+        reply: 'Ó máa ń sùn lábẹ́ àwọ̀n ẹ̀fọn, ṣùgbọ́n ihò kan wà nínú rẹ̀.',
+        critical: true,
+      ),
+      KeyPoint(
+        id: 'voyage',
+        label: 'Beere nípa ìrìnàjò àìpẹ́ yìí',
+        keywords: [
+          'ìrìnàjò',
+          'lọ sí',
+          'ìlú',
+          'travel',
+          'trip',
+          'village',
+        ],
+        examples: ['Ṣé ẹ ti rìnrìn àjò lọ sí ibòmíì láìpẹ́?'],
+        reply: 'A lọ bẹ ìyá ọkọ mi wò ní ìlú ní ọ̀sẹ̀ tó kọjá.',
+        critical: true,
+      ),
+      KeyPoint(
+        id: 'autres_symptomes',
+        label: 'Ṣàyẹ̀wò àwọn àmì míì bí ìgbọ̀n tàbí ìgbagbogbo',
+        keywords: [
+          'ìgbọ̀n',
+          'ìgbagbogbo',
+          'ìrẹ̀wẹ̀sì',
+          'sùn',
+          'ìkọ́',
+          'convulsion',
+          'seizure',
+          'vomit',
+        ],
+        examples: ['Ṣé ó ní àmì àìsàn míì tàbí ó ń rẹ̀ ẹ́ gan-an?'],
+        reply: 'Ó rẹ̀ ẹ́ gan-an, ó sì ti ń sùn ju bó ṣe máa ń sùn lọ.',
+        critical: true,
+      ),
+      KeyPoint(
+        id: 'hydratation',
+        label: 'Beere bóyá ó ṣì ń jẹun àti mu omi',
+        keywords: [
+          'mu omi',
+          'mu',
+          'jẹun',
+          'jeun',
+          'omi',
+          'drink',
+          'water',
+          'eat',
+          'feeding',
+        ],
+        examples: ['Ṣé ó ṣì ń mu omi àti jẹun bí ó ti máa ń ṣe?'],
+        reply: 'Ó ń mu omi díẹ̀ sí i láàárín ọjọ́, ṣùgbọ́n ó ṣì ń mu.',
+      ),
+    ],
+    fallbackReplies: [
+      'Ẹ jọ̀ọ́, mi ò lóye ìbéèrè náà dáadáa.',
+      'Mi ò mọ̀ dájú; ẹ jọ̀ọ́ tún béèrè.',
+    ],
+    repeatReplies: [
+      'Mo ti sọ fún yín tẹ́lẹ̀.',
+      'Bẹ́ẹ̀ ni, gẹ́gẹ́ bí mo ṣe sọ tẹ́lẹ̀.',
+    ],
+    clinicalInfo: ScenarioClinicalInfo(
+      displayTitle: 'Ọmọ kan tí ó ní ibà fún ọjọ́ méjì',
+      correctDiagnosis: 'Ìfura sí àìsàn ibà (malaria)',
+      distractors: [
+        'Àìsàn ọ̀fun ọlọ́jẹ̀',
+        'Àkóràn etí',
+        'Ìyọ eyín',
+      ],
+      alertSigns: [
+        AlertSign(
+          trigger: 'Àwọ̀n ẹ̀fọn tí ó ní ihò',
+          cause: 'Ó lè jẹ́ kí ẹ̀fọn já ọmọ náà.',
+        ),
+        AlertSign(
+          trigger: 'Ìrìnàjò sí agbègbè tí ewu ibà wà',
+          cause: 'Ó lè fi hàn pé ọmọ náà ti wà ní agbègbè ewu.',
+        ),
+        AlertSign(
+          trigger: 'Ọmọ náà rẹ̀ gan-an tàbí ó ṣòro láti jí',
+          cause: 'Èyí lè jẹ́ àmì ewu tó nílò ìtọju kíákíá.',
+        ),
+      ],
+      symptoms: [
+        'Ibà àti ìgbọ̀n',
+        'Orí fífọ́',
+        'Ara ríru',
+        'Ìgbagbogbo tàbí ìgbẹ́ gbuuru',
+      ],
+      management:
+          'Ẹ tọ́ka ọmọ náà sí ilé ìwòsàn fún àyẹ̀wò kíákíá. '
+          'Tí ó bá ṣòro láti jí, ní ìgbagbogbo, tàbí kò bá fẹ́ mu omi, '
+          'ẹ wá ìrànlọ́wọ́ pajawiri.',
     ),
   );
 
@@ -366,7 +492,13 @@ class OfflineScenarios {
   /// Firestore. `null` si aucun des deux n'a de version hors-ligne pour ce
   /// titre (dans ce cas, le mode hors-ligne et le bouton diagnostic
   /// doivent rester grisés dans l'UI).
-  static OfflineScenario? forTitle(String title) {
+  static OfflineScenario? forTitle(
+    String title, {
+    AppLanguage language = AppLanguage.english,
+  }) {
+    if (language.isYoruba && title == feverChild.title) {
+      return yorubaFeverChild;
+    }
     for (final s in all) {
       if (s.title == title) return s;
     }

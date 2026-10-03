@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../services/firebase/auth_service.dart';
 import '../services/firebase/session_repository.dart';
+import '../services/lang/app_language.dart';
 import '../services/offline/offline_patient_brain.dart';
 import '../theme/app_theme.dart';
 import '../widgets/content_width.dart';
@@ -26,6 +27,7 @@ class DiagnosisScreen extends StatefulWidget {
     required this.agentUtterances,
     required this.scenarioTitle,
     required this.mode,
+    this.language = AppLanguage.english,
     this.sessionRepository,
   });
 
@@ -45,6 +47,7 @@ class DiagnosisScreen extends StatefulWidget {
 
   /// 'live' / 'light' / 'offline'.
   final String mode;
+  final AppLanguage language;
 
   /// Injectable pour les tests ; sinon une instance par défaut.
   final SessionRepository? sessionRepository;
@@ -74,6 +77,7 @@ class _DiagnosisScreenState extends State<DiagnosisScreen> {
       MaterialPageRoute(
         builder: (context) => RecapScreen(
           clinicalInfo: widget.clinicalInfo,
+          language: widget.language,
           scan: scan,
           score: score,
           selectedDiagnosis: _selected!,
@@ -110,14 +114,15 @@ class _DiagnosisScreenState extends State<DiagnosisScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final yoruba = widget.language.isYoruba;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          tooltip: 'Back to the interview',
+          tooltip: yoruba ? 'Padà sí ìfọ̀rọ̀wánilẹ́nuwò' : 'Back to the interview',
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text('Make my diagnosis'),
+        title: Text(yoruba ? 'Yan àyẹ̀wò mi' : 'Make my diagnosis'),
       ),
       body: SafeArea(
         child: ContentWidth(
@@ -127,7 +132,9 @@ class _DiagnosisScreenState extends State<DiagnosisScreen> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
                 child: Text(
-                  'Based on what the patient told you, what is your diagnosis?',
+                  yoruba
+                      ? 'Ní ìbámu pẹ̀lú ohun tí aláìsàn sọ, àyẹ̀wò wo ni o rò pé ó yẹ?'
+                      : 'Based on what the patient told you, what is your diagnosis?',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
@@ -150,9 +157,11 @@ class _DiagnosisScreenState extends State<DiagnosisScreen> {
                   width: double.infinity,
                   child: FilledButton(
                     onPressed: _selected == null ? null : _validate,
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 14),
-                      child: Text('Confirm my diagnosis'),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      child: Text(
+                        yoruba ? 'Jẹ́rìí àyẹ̀wò mi' : 'Confirm my diagnosis',
+                      ),
                     ),
                   ),
                 ),

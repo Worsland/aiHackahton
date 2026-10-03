@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../services/lang/app_language.dart';
 import '../services/offline/offline_patient_brain.dart';
 import '../theme/app_theme.dart';
 import '../widgets/content_width.dart';
@@ -15,17 +16,20 @@ class RecapScreen extends StatelessWidget {
     required this.scan,
     required this.score,
     required this.selectedDiagnosis,
+    this.language = AppLanguage.english,
   });
 
   final ScenarioClinicalInfo clinicalInfo;
   final KeyPointScan scan;
   final SessionScore score;
   final String selectedDiagnosis;
+  final AppLanguage language;
 
   bool get _diagnosisCorrect => score.diagnosisCorrect;
 
   @override
   Widget build(BuildContext context) {
+    final yoruba = language.isYoruba;
     final scoreColor = score.percent >= 70
         ? AppColors.success
         : score.percent >= 40
@@ -36,10 +40,10 @@ class RecapScreen extends StatelessWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          tooltip: 'Back to the interview',
+          tooltip: yoruba ? 'Padà sí ìfọ̀rọ̀wánilẹ́nuwò' : 'Back to the interview',
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text('Summary'),
+        title: Text(yoruba ? 'Àkótán' : 'Summary'),
       ),
       body: SafeArea(
         child: ContentWidth(
@@ -47,21 +51,42 @@ class RecapScreen extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
             children: [
-              _ScoreHeader(percent: score.percent, color: scoreColor),
+              if (yoruba) ...[
+                Card(
+                  color: AppColors.secondary.withValues(alpha: 0.12),
+                  child: const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Text(
+                      'Àkóónú Yorùbá yìí ṣì jẹ́ àkọ́kọ́; a kò tíì fọwọ́ sí i fún ìlera.',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+              _ScoreHeader(
+                percent: score.percent,
+                color: scoreColor,
+                language: language,
+              ),
               const SizedBox(height: 24),
               _DiagnosisResult(
                 correct: _diagnosisCorrect,
                 selected: selectedDiagnosis,
                 correctDiagnosis: clinicalInfo.correctDiagnosis,
+                language: language,
               ),
               const SizedBox(height: 24),
               _Section(
                 icon: Icons.check_circle_outline_rounded,
                 iconColor: AppColors.success,
-                title: 'Relevant questions asked',
+                title: yoruba
+                    ? 'Àwọn ìbéèrè tó yẹ tí a béèrè'
+                    : 'Relevant questions asked',
                 child: scan.hit.isEmpty
-                    ? const _EmptyNote(
-                        'No key point was covered during this interview.',
+                    ? _EmptyNote(
+                        yoruba
+                            ? 'A kò béèrè nípa kókó pàtàkì kankan.'
+                            : 'No key point was covered during this interview.',
                       )
                     : Column(
                         children: [
@@ -74,7 +99,7 @@ class RecapScreen extends StatelessWidget {
               _Section(
                 icon: Icons.report_gmailerrorred_rounded,
                 iconColor: Colors.redAccent,
-                title: 'Patient warning signs',
+                title: yoruba ? 'Àwọn àmì ewu aláìsàn' : 'Patient warning signs',
                 child: Column(
                   children: [
                     for (final a in clinicalInfo.alertSigns)
@@ -107,7 +132,9 @@ class RecapScreen extends StatelessWidget {
                 _Section(
                   icon: Icons.help_outline_rounded,
                   iconColor: AppColors.secondary,
-                  title: 'Don\'t forget next time',
+                  title: yoruba
+                      ? 'Má gbàgbé ní ìgbà tó ń bọ̀'
+                      : 'Don\'t forget next time',
                   child: Column(
                     children: [
                       for (final k in scan.missed)
@@ -125,7 +152,7 @@ class RecapScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Typical symptoms',
+                      yoruba ? 'Àwọn àmì àìsàn tó wọ́pọ̀' : 'Typical symptoms',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         color: AppColors.primary,
                       ),
@@ -134,7 +161,7 @@ class RecapScreen extends StatelessWidget {
                     Text(clinicalInfo.symptoms.join(' · ')),
                     const SizedBox(height: 14),
                     Text(
-                      'Recommended action',
+                      yoruba ? 'Ìgbésẹ̀ tí a dámọ̀ràn' : 'Recommended action',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         color: AppColors.primary,
                       ),
@@ -150,9 +177,11 @@ class RecapScreen extends StatelessWidget {
                 child: OutlinedButton(
                   onPressed: () =>
                       Navigator.of(context).popUntil((r) => r.isFirst),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 14),
-                    child: Text('Back to scenarios'),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    child: Text(
+                      yoruba ? 'Padà sí àwọn àpẹẹrẹ' : 'Back to scenarios',
+                    ),
                   ),
                 ),
               ),
@@ -165,9 +194,14 @@ class RecapScreen extends StatelessWidget {
 }
 
 class _ScoreHeader extends StatelessWidget {
-  const _ScoreHeader({required this.percent, required this.color});
+  const _ScoreHeader({
+    required this.percent,
+    required this.color,
+    required this.language,
+  });
   final int percent;
   final Color color;
+  final AppLanguage language;
 
   @override
   Widget build(BuildContext context) {
@@ -191,7 +225,10 @@ class _ScoreHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          Text('Session score', style: Theme.of(context).textTheme.bodyMedium),
+          Text(
+            language.isYoruba ? 'Àmì ìdánilẹ́kọ̀ọ́' : 'Session score',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
         ],
       ),
     );
@@ -203,11 +240,13 @@ class _DiagnosisResult extends StatelessWidget {
     required this.correct,
     required this.selected,
     required this.correctDiagnosis,
+    required this.language,
   });
 
   final bool correct;
   final String selected;
   final String correctDiagnosis;
+  final AppLanguage language;
 
   @override
   Widget build(BuildContext context) {
@@ -231,11 +270,22 @@ class _DiagnosisResult extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  correct ? 'Correct diagnosis' : 'Diagnosis to review',
+                  language.isYoruba
+                      ? (correct ? 'Àyẹ̀wò tó tọ́' : 'Àyẹ̀wò láti tún wò')
+                      : (correct ? 'Correct diagnosis' : 'Diagnosis to review'),
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                Text('Your answer: $selected'),
-                if (!correct) Text('Expected answer: $correctDiagnosis'),
+                Text(
+                  language.isYoruba
+                      ? 'Ìdáhùn rẹ: $selected'
+                      : 'Your answer: $selected',
+                ),
+                if (!correct)
+                  Text(
+                    language.isYoruba
+                        ? 'Ìdáhùn tó tọ́: $correctDiagnosis'
+                        : 'Expected answer: $correctDiagnosis',
+                  ),
               ],
             ),
           ),

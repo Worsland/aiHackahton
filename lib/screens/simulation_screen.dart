@@ -6,6 +6,7 @@ import 'package:flutter_gemma/core/model_management/cancel_token.dart';
 import '../services/gemini_service.dart';
 import '../services/firebase/auth_service.dart';
 import '../services/live/gemini_live_service.dart';
+import '../services/lang/app_language.dart';
 import '../services/offline/offline_patient_brain.dart';
 import '../services/offline/offline_voice_player.dart';
 import '../services/offline/offline_scenarios.dart';
@@ -44,8 +45,14 @@ bool _isWide(BuildContext context) =>
 /// Titre neutre affiché à l'agent. Jamais l'identifiant interne du
 /// scénario (`PatientScenario.title`), qui peut trahir le diagnostic
 /// (ex : "Déshydratation").
-String _displayTitle(String internalTitle) =>
-    OfflineScenarios.forTitle(internalTitle)?.clinicalInfo.displayTitle ??
+String _displayTitle(
+  String internalTitle, {
+  AppLanguage language = AppLanguage.english,
+}) =>
+    OfflineScenarios.forTitle(
+      internalTitle,
+      language: language,
+    )?.clinicalInfo.displayTitle ??
     internalTitle;
 
 /// Centre son contenu et limite sa largeur à [_kContentMaxWidth].
@@ -92,6 +99,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
   /// Le mode "naturel" (Gemini Live, ancien bool `_liveMode = true`) reste
   /// utilisable ailleurs dans le fichier via `_mode == ConversationMode.live`.
   ConversationMode _mode = ConversationMode.live;
+  AppLanguage _language = AppLanguage.english;
 
   /// Cerveau hors-ligne pour le scénario en cours (arbre de dialogue local,
   /// aucun réseau). `null` si ce scénario n'a pas encore de version
@@ -218,15 +226,21 @@ class _SimulationScreenState extends State<SimulationScreen> {
     _voice.stopSpeaking();
     _offlineVoice.stop();
     _live.stop();
-    final offlineScenario = OfflineScenarios.forTitle(scenario.title);
+    final offlineScenario = OfflineScenarios.forTitle(
+      scenario.title,
+      language: _language,
+    );
+    final selectedMode = _language.isYoruba ? ConversationMode.offline : _mode;
     setState(() {
       _scenario = scenario;
+      _mode = selectedMode;
       _transcript.clear();
       _isSpeaking = false;
       _offlineAiPreparing = false;
       _offlineAiUnavailable = false;
       _offlineAiSkipped =
-          !_offlineAiEnabled && _mode == ConversationMode.offline;
+          (!_offlineAiEnabled || _language.isYoruba) &&
+          _mode == ConversationMode.offline;
       _offlineBrain = offlineScenario == null
           ? null
           : OfflinePatientBrain(offlineScenario);
@@ -234,10 +248,13 @@ class _SimulationScreenState extends State<SimulationScreen> {
         _mode = ConversationMode.live;
       }
     });
-    widget.geminiService.startScenarioChat(scenario.systemPrompt);
+    if (!_language.isYoruba) {
+      widget.geminiService.startScenarioChat(scenario.systemPrompt);
+    }
     final brain = _offlineBrain;
     if (_mode == ConversationMode.offline &&
         _offlineAiEnabled &&
+        !_language.isYoruba &&
         brain != null) {
       unawaited(_prepareOfflineBrain(brain));
     }
@@ -389,7 +406,9 @@ class _SimulationScreenState extends State<SimulationScreen> {
       String replyText;
       if (_mode == ConversationMode.offline) {
         final brain = _offlineBrain!;
-        if (_offlineAiEnabled) unawaited(_prepareOfflineBrain(brain));
+        if (_offlineAiEnabled && !_language.isYoruba) {
+          unawaited(_prepareOfflineBrain(brain));
+        }
         offlineReply = await brain
             .replyAsync(heard)
             .timeout(
@@ -402,6 +421,11 @@ class _SimulationScreenState extends State<SimulationScreen> {
               },
             );
         replyText = offlineReply.text;
+        if (offlineReply.needsRephrase && _language.isYoruba) {
+          _showSnack(
+            'A kò dá wa lójú. Jọ̀ọ́ tún béèrè tàbí béèrè lọ́wọ́ olùkọ́.',
+          );
+        }
       } else {
         replyText = await widget.geminiService.sendMessage(heard);
       }
@@ -415,9 +439,9 @@ class _SimulationScreenState extends State<SimulationScreen> {
         _isBusy = false;
         _isSpeaking = true;
       });
-      if (offlineReply != null) {
+      if (offlineReply != null && !_language.isYoruba) {
         await _offlineVoice.speak(_clinicalData!.look, offlineReply);
-      } else {
+      } else if (offlineReply == null) {
         await _voice.speak(replyText);
       }
     } catch (e) {
@@ -439,8 +463,9 @@ class _SimulationScreenState extends State<SimulationScreen> {
   /// Contenu clinique (diagnostic, signaux, points clés) du scénario en
   /// cours. `null` tant que tous les scénarios n'ont pas encore de fiche
   /// clinique — dans ce cas le bouton diagnostic doit rester désactivé.
-  OfflineScenario? get _clinicalData =>
-      _scenario == null ? null : OfflineScenarios.forTitle(_scenario!.title);
+  OfflineScenario? get _clinicalData => _scenario == null
+      ? null
+      : OfflineScenarios.forTitle(_scenario!.title, language: _language);
 
   void _openDiagnosis() {
     final data = _clinicalData;
@@ -453,6 +478,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
       MaterialPageRoute(
         builder: (context) => DiagnosisScreen(
           clinicalInfo: data.clinicalInfo,
+          language: _language,
           keyPoints: data.keyPoints,
           agentUtterances: agentUtterances,
           scenarioTitle: _scenario!.title,
@@ -464,6 +490,14 @@ class _SimulationScreenState extends State<SimulationScreen> {
 
   String get _statusText {
     if (_mode == ConversationMode.offline) {
+      if (_language.isYoruba) {
+        return 'Ó ń ṣiṣẹ́ láìsí intanẹẹti · A kò fi ìbéèrè ránṣẹ́ síta · '
+            'Ìbéèrè pàtàkì tí a ti béèrè: '
+            '${_offlineBrain?.askedKeyPoints.length ?? 0}/'
+            '${_offlineBrain?.scenario.keyPoints.length ?? 0}. '
+            'Àkọsílẹ̀ Yorùbá jẹ́ àkọ́kọ́; a ó tún yẹ̀ ẹ́ wò. '
+            'Ìdáhùn jẹ́ ọ̀rọ̀ nìkan; a kò tíì fi ohùn Yorùbá kún un.';
+      }
       final aiStatus = _offlineAiPreparing
           ? 'Preparing on-device AI… '
           : _offlineBrain?.semanticEnabled == true
@@ -499,10 +533,9 @@ class _SimulationScreenState extends State<SimulationScreen> {
     return _scenario!.description;
   }
 
-  /// Le mode hors ligne n'existe que sur mobile (sur le web, il faut déjà
-  /// du réseau pour charger l'app) et seulement si le scénario a un arbre
-  /// de dialogue local.
-  bool get _offlineAvailable => !kIsWeb && _offlineBrain != null;
+  /// Le dialogue hors ligne par mots-clés est aussi disponible sur le web
+  /// après le chargement de l'app ; Gecko reste réservé au mobile.
+  bool get _offlineAvailable => _offlineBrain != null;
 
   IconData get _modeIcon => switch (_mode) {
     ConversationMode.live => Icons.graphic_eq_rounded,
@@ -517,6 +550,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
 
   /// Bascule online ↔ offline et propose le téléchargement au premier usage.
   Future<void> _cycleMode() async {
+    if (_language.isYoruba) return;
     if (_mode == ConversationMode.offline) {
       setState(() => _mode = ConversationMode.live);
       return;
@@ -524,6 +558,15 @@ class _SimulationScreenState extends State<SimulationScreen> {
 
     final brain = _offlineBrain;
     if (brain == null) return;
+
+    if (kIsWeb) {
+      setState(() {
+        _mode = ConversationMode.offline;
+        _offlineAiSkipped = true;
+        _offlineAiUnavailable = false;
+      });
+      return;
+    }
 
     if (_offlineAiEnabled && _offlineEmbedderFuture != null) {
       setState(() => _mode = ConversationMode.offline);
@@ -735,8 +778,14 @@ class _SimulationScreenState extends State<SimulationScreen> {
 
     // Scénarios groupés par palier (Easy → Medium → Hard) pour la liste ;
     // voir `_groupedScenarioItems`.
+    final availableScenarios = _language.isYoruba
+        ? PatientScenario.examples
+              .where((s) => s.title == OfflineScenarios.feverChild.title)
+              .toList()
+        : ScenarioCatalog.instance.scenarios;
     final pickerItems = _groupedScenarioItems(
-      ScenarioCatalog.instance.scenarios,
+      availableScenarios,
+      language: _language,
     );
 
     final content = SafeArea(
@@ -768,18 +817,64 @@ class _SimulationScreenState extends State<SimulationScreen> {
                   ),
                   const SizedBox(height: 14),
                   Text(
-                    'Practice your medical interview',
+                    _language.isYoruba
+                        ? 'Ẹ ṣe ìdánilẹ́kọ̀ọ́ ìfọ̀rọ̀wánilẹ́nuwò ìlera'
+                        : 'Practice your medical interview',
                     style: Theme.of(
                       context,
                     ).textTheme.headlineSmall?.copyWith(color: Colors.white),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Choose a virtual patient and run the consultation out loud.',
+                    _language.isYoruba
+                        ? 'Yan aláìsàn àfojúṣe kí o sì ṣe ìdánilẹ́kọ̀ọ́ láìsí intanẹẹti.'
+                        : 'Choose a virtual patient and run the consultation out loud.',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Colors.white.withValues(alpha: 0.9),
                     ),
                   ),
+                  const SizedBox(height: 18),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: DropdownButton<AppLanguage>(
+                      value: _language,
+                      underline: const SizedBox.shrink(),
+                      items: [
+                        for (final language in AppLanguage.values)
+                          DropdownMenuItem(
+                            value: language,
+                            child: Text(language.label),
+                          ),
+                      ],
+                      onChanged: (language) {
+                        if (language == null) return;
+                        setState(() {
+                          if (_language.isYoruba &&
+                              language == AppLanguage.english) {
+                            _mode = ConversationMode.live;
+                          }
+                          _language = language;
+                        });
+                      },
+                    ),
+                  ),
+                  if (_language.isYoruba) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      'Àkọ́kọ́ Yorùbá fún ìdánwò ni. Jọ̀ọ́ ṣàyẹ̀wò ọ̀rọ̀ àti ìmọ̀ ìlera.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -814,6 +909,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
                 final s = item as PatientScenario;
                 return _ScenarioCard(
                   scenario: s,
+                  language: _language,
                   onTap: () => _startScenario(s),
                 );
               },
@@ -927,12 +1023,14 @@ class _SimulationScreenState extends State<SimulationScreen> {
         appBar: AppBar(
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_rounded),
-            tooltip: 'Back to scenarios',
+            tooltip: _language.isYoruba
+                ? 'Padà sí àwọn àpẹẹrẹ'
+                : 'Back to scenarios',
             onPressed: _backToPicker,
           ),
-          title: Text(_displayTitle(_scenario!.title)),
+          title: Text(_displayTitle(_scenario!.title, language: _language)),
           actions: [
-            if (_offlineAvailable)
+            if (_offlineBrain != null && !_language.isYoruba)
               IconButton(
                 icon: Icon(_modeIcon),
                 tooltip: _modeTooltip,
@@ -1078,7 +1176,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
   Widget _buildVerticalSessionActions() {
     final diagnosisButton = FilledButton.icon(
       icon: const Icon(Icons.psychology_alt_outlined, size: 18),
-      label: const Text('Diagnosis'),
+      label: Text(_language.isYoruba ? 'Ṣe àyẹ̀wò' : 'Diagnosis'),
       onPressed: (_isBusy || _transcript.isEmpty || _clinicalData == null)
           ? null
           : _openDiagnosis,
@@ -1192,11 +1290,15 @@ class _SimulationScreenState extends State<SimulationScreen> {
             Text(
               switch (_mode) {
                 ConversationMode.live =>
-                  'Tap the microphone to start the conversation, then '
-                      'speak naturally: say hello to the patient.',
+                  _language.isYoruba
+                      ? 'Fọwọ́ kan gbohungbohun láti bẹ̀rẹ̀, kí o sì kí aláìsàn.'
+                      : 'Tap the microphone to start the conversation, then '
+                            'speak naturally: say hello to the patient.',
                 ConversationMode.offline =>
-                  'Offline mode: type your question. The patient answers '
-                      'without a connection.',
+                  _language.isYoruba
+                      ? 'Kọ ìbéèrè rẹ ní Yorùbá. Aláìsàn yóò dáhùn láìsí intanẹẹti.'
+                      : 'Offline mode: type your question. The patient answers '
+                            'without a connection.',
               },
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
@@ -1228,7 +1330,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
     // clinique.
     final diagnosisButton = FilledButton.icon(
       icon: const Icon(Icons.psychology_alt_outlined, size: 18),
-      label: const Text('Diagnosis'),
+      label: Text(_language.isYoruba ? 'Ṣe àyẹ̀wò' : 'Diagnosis'),
       onPressed: (_isBusy || _transcript.isEmpty || _clinicalData == null)
           ? null
           : _openDiagnosis,
@@ -1310,7 +1412,9 @@ class _SimulationScreenState extends State<SimulationScreen> {
             textInputAction: TextInputAction.send,
             onSubmitted: (_) => _submitTyped(),
             decoration: InputDecoration(
-              hintText: 'Type your question…',
+              hintText: _language.isYoruba
+                  ? 'Kọ ìbéèrè rẹ níbí…'
+                  : 'Type your question…',
               filled: true,
               fillColor: AppColors.bg,
               contentPadding: const EdgeInsets.symmetric(
@@ -1375,13 +1479,18 @@ int _difficultyRank(String label) {
 /// Regroupe les scénarios par palier (Easy, puis Medium, puis Hard),
 /// chaque groupe non vide précédé d'un `_DifficultyGroup`. L'ordre relatif
 /// des scénarios à l'intérieur d'un même palier est conservé.
-List<Object> _groupedScenarioItems(List<PatientScenario> scenarios) {
+List<Object> _groupedScenarioItems(
+  List<PatientScenario> scenarios, {
+  AppLanguage language = AppLanguage.english,
+}) {
   final buckets = <int, List<PatientScenario>>{0: [], 1: [], 2: []};
   for (final s in scenarios) {
     final rank = _difficultyRank(_ScenarioVisuals.of(s.title).difficulty);
     buckets[rank]!.add(s);
   }
-  const labels = {0: 'Easy', 1: 'Medium', 2: 'Hard'};
+  final labels = language.isYoruba
+      ? const {0: 'Rọrùn', 1: 'Lẹ́gbẹ̀ẹ́', 2: 'Líle'}
+      : const {0: 'Easy', 1: 'Medium', 2: 'Hard'};
   final items = <Object>[];
   for (final rank in [0, 1, 2]) {
     final list = buckets[rank]!;
@@ -1443,8 +1552,13 @@ class _ScenarioVisuals {
 }
 
 class _ScenarioCard extends StatelessWidget {
-  const _ScenarioCard({required this.scenario, required this.onTap});
+  const _ScenarioCard({
+    required this.scenario,
+    required this.language,
+    required this.onTap,
+  });
   final PatientScenario scenario;
+  final AppLanguage language;
   final VoidCallback onTap;
 
   Color _difficultyColor(String difficulty) {
@@ -1485,12 +1599,14 @@ class _ScenarioCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _displayTitle(scenario.title),
+                      _displayTitle(scenario.title, language: language),
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      scenario.description,
+                      language.isYoruba
+                          ? 'Ìyá kan mú ọmọ ọdún mẹ́rin wá; ọmọ náà ti ní ibà fún ọjọ́ méjì.'
+                          : scenario.description,
                       style: Theme.of(context).textTheme.bodyMedium,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,

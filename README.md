@@ -60,9 +60,10 @@ Le score global combine 60 % de couverture des points clés et 40 % de justesse 
 | Mode | Fonctionnement | Réseau et données |
 |---|---|---|
 | **Live** | Gemini Live reçoit l'audio du microphone en continu, répond avec une voix générée et fournit les transcriptions affichées dans le fil de discussion. | Connexion nécessaire. L'audio est envoyé au service Gemini. |
-| **Hors ligne** | L'agent écrit ses questions. `OfflinePatientBrain` utilise Gecko localement pour rapprocher la question des points clés et choisir une réponse scénarisée ; les mots-clés restent le repli. La réponse audio locale est jouée si elle existe, sinon le TTS est utilisé. | Au premier passage en mode hors ligne, l'application propose le téléchargement du modèle public (environ 115 Mo). Une fois installé, le dialogue fonctionne sans réseau et n'envoie pas les questions à Gemini. La synchronisation et la sauvegarde cloud ne sont pas garanties hors connexion. |
+| **Hors ligne — English** | L'agent écrit ses questions. `OfflinePatientBrain` peut utiliser Gecko (modèle anglais) et le matcher lexical pour choisir une réponse scénarisée. | Gecko peut être téléchargé une fois (environ 115 Mo). Après installation, la conversation fonctionne sans réseau et n'envoie pas les questions à Gemini. |
+| **Hors ligne — Yorùbá (prototype)** | Un cas de fièvre chez l'enfant est disponible en Yorùbá. Il utilise un matcher lexical local et des réponses préécrites ; Gecko n'est pas utilisé pour cette langue. L'entretien se fait par texte. | Aucun envoi réseau pour les questions. Les formulations yoruba sont un brouillon à relire ; elles ne sont pas encore validées linguistiquement ou cliniquement. |
 
-Le mode hors ligne est proposé sur Android et iOS pour les scénarios disposant d'une fiche locale. Le modèle s'exécute sur Android arm64 et nécessite iOS 15 ou une version ultérieure. Si son téléchargement ou son initialisation échoue, l'application conserve le dialogue par mots-clés. Le mode Live requiert une connexion et une clé Gemini valide. Les deux modes affichent une transcription textuelle de l'entretien.
+Le sélecteur de langue est disponible sur l'écran de choix des scénarios. En Yorùbá, le prototype expose uniquement le scénario de fièvre et passe automatiquement en mode hors ligne ; les autres scénarios et Gemini Live restent en anglais. Les réponses yoruba sont affichées en texte : aucun audio yoruba préenregistré n'est encore fourni. Le mode Live requiert une connexion et une clé Gemini valide.
 
 ## Écrans
 
@@ -99,7 +100,10 @@ lib/
     scenario_score_board.dart         Agrégation et cache des meilleurs scores
     offline/
       offline_scenarios.dart           Répliques, points clés et fiches cliniques
-      offline_patient_brain.dart       Dialogue local, compréhension sémantique avec repli mots-clés et calcul du score
+      offline_patient_brain.dart       Dialogue local, matching lexical/sémantique et calcul du score
+    lang/
+      app_language.dart                Langues affichées (English, Yorùbá)
+      yoruba_normalizer.dart           Normalisation yoruba pour le matching lexical
       offline_voice_player.dart        Audio préenregistré avec repli TTS
     live/
       gemini_live_service.dart         Session vocale Gemini Live via WebSocket
@@ -219,10 +223,16 @@ Les tests Dart du matcher sémantique sont dans `test/semantic_matcher_test.dart
 
 ## Limites actuelles
 
+- Les sources, limites des données et mesures du prototype Yorùbá sont
+  documentées dans [`docs/DATA_SOURCES.md`](docs/DATA_SOURCES.md) et
+  [`docs/EVALUATION.md`](docs/EVALUATION.md).
 - Le contenu médical des scénarios est illustratif et doit être révisé par des professionnels avant tout usage réel.
 - L'application n'est pas un outil de diagnostic ou de traitement et ne remplace pas les protocoles locaux.
 - En mode hors ligne, les embeddings rapprochent la question des formulations d'exemple pour sélectionner une réponse préécrite ; ce n'est pas un patient génératif. Le repli par mots-clés et un seuil sémantique non calibré sur des échanges réels peuvent produire une réponse inadaptée.
-- Les interactions sont principalement en anglais et la reconnaissance vocale n'est pas une fonctionnalité de saisie hors ligne exposée dans le parcours actuel.
+- Le prototype Yorùbá couvre uniquement le scénario de fièvre et le texte ; ses formulations et son contenu clinique sont à relire par l'équipe et ne constituent pas une traduction validée.
+- Le matcher lexical Yorùbá peut échouer sur des paraphrases, des variantes dialectales ou des mélanges Yorùbá/anglais ; en cas d'ambiguïté ou d'absence de correspondance, l'application demande de reformuler plutôt que de choisir une réponse au hasard.
+- Gecko 110M est un modèle anglais, pas un modèle bilingue ; il n'est pas utilisé pour les questions yoruba.
+- La reconnaissance vocale hors ligne et les réponses audio en yoruba ne sont pas disponibles dans ce prototype.
 - Le mode Live dépend du réseau, de Gemini et de la disponibilité du modèle configuré dans `lib/services/live/gemini_live_service.dart`.
 - Les fonctionnalités Firebase nécessitent un projet correctement configuré et des règles Firestore sûres.
 - L'authentification anonyme créée pour la première fois et la synchronisation des données requièrent une connexion.

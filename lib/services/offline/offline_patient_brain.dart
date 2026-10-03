@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import '../../widgets/patient_avatar.dart' show PatientLook;
+import '../lang/app_language.dart';
 import 'offline_text_match.dart';
 import 'semantic_matcher.dart';
 
@@ -113,9 +114,11 @@ class OfflineScenario {
     required this.fallbackReplies,
     required this.repeatReplies,
     required this.clinicalInfo,
+    this.language = AppLanguage.english,
   });
 
   final String title;
+  final AppLanguage language;
 
   /// Le personnage qui incarne ce scénario : détermine à la fois l'avatar
   /// animé et, en mode hors-ligne, le dossier de voix pré-enregistrée à
@@ -195,9 +198,10 @@ class OfflineFeedback {
 /// l'`id` d'un [KeyPoint] (ex: `'moustiquaire'`), soit une position dans
 /// `fallbackReplies`/`repeatReplies` (ex: `'fallback_0'`).
 class OfflineReply {
-  const OfflineReply(this.text, this.audioId);
+  const OfflineReply(this.text, this.audioId, {this.needsRephrase = false});
   final String text;
   final String audioId;
+  final bool needsRephrase;
 }
 
 class OfflinePatientBrain {
@@ -229,8 +233,13 @@ class OfflinePatientBrain {
     // On répond d'abord à un point pas encore abordé : si la phrase touche
     // à la fois un sujet déjà traité et un nouveau, le patient répond au
     // nouveau au lieu de dire "je te l'ai déjà dit".
-    final fresh = ranked.where((m) => !_asked.contains(m.item.id));
+    final fresh = ranked.where((m) => !_asked.contains(m.item.id)).toList();
     if (fresh.isEmpty) return _pick(scenario.repeatReplies, 'repeat');
+    if (scenario.language.isYoruba &&
+        fresh.length > 1 &&
+        fresh[0].score == fresh[1].score) {
+      return _pick(scenario.fallbackReplies, 'fallback');
+    }
 
     final best = fresh.first.item;
     _asked.add(best.id);
@@ -339,7 +348,11 @@ class OfflinePatientBrain {
   /// sans renommer les fichiers audio déjà enregistrés en conséquence.
   OfflineReply _pick(List<String> options, String prefix) {
     final i = _rng.nextInt(options.length);
-    return OfflineReply(options[i], '${prefix}_$i');
+    return OfflineReply(
+      options[i],
+      '${prefix}_$i',
+      needsRephrase: prefix == 'fallback',
+    );
   }
 
   bool _looksLikeGibberish(String text) {
