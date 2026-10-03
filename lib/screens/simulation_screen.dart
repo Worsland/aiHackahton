@@ -8,6 +8,7 @@ import '../services/firebase/auth_service.dart';
 import '../services/live/gemini_live_service.dart';
 import '../services/lang/app_language.dart';
 import '../services/lang/app_language_controller.dart';
+import '../services/offline/offline_whisper_api.dart';
 import '../services/offline/offline_patient_brain.dart';
 import '../services/offline/offline_voice_player.dart';
 import '../services/offline/offline_scenarios.dart';
@@ -18,7 +19,6 @@ import 'progress_screen.dart';
 import '../services/scenario_catalog.dart';
 import '../services/scenario_score_board.dart';
 import '../services/voice_service.dart';
-import '../services/web_stt/web_offline_stt.dart';
 import '../services/patient_scenario.dart';
 import '../theme/app_theme.dart';
 import '../widgets/patient_avatar.dart';
@@ -390,6 +390,16 @@ class _SimulationScreenState extends State<SimulationScreen> {
       heard = await _voice.listenOnce(
         onDevice: _mode == ConversationMode.offline,
         localeId: _language.speechLocaleId,
+        onOfflineStatus: (status) {
+          if (!mounted || status != OfflineWhisperStatus.downloadingModel) {
+            return;
+          }
+          _showSnack(
+            _language.isYoruba
+                ? 'A ń gba àwòṣe ìdámọ̀ ohùn offline kalẹ̀. Èyí gba ìsopọ̀ intanẹẹti lẹ́ẹ̀kan ṣoṣo.'
+                : 'Downloading the offline speech model. An internet connection is needed once.',
+          );
+        },
       );
     } on OfflineSttException catch (e) {
       _showSnack(e.message);

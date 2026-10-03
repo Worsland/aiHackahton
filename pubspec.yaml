@@ -56,6 +56,7 @@ dependencies:
   flutter_gemma: ^1.0.0-rc.1
   flutter_gemma_embeddings: ^2.2.1
   flutter_gemma_litertlm: ^1.8.5
+  whisper_ggml: ^2.7.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

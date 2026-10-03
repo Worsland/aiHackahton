@@ -7,7 +7,12 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:permission_handler/permission_handler.dart';
 
 import 'lang/speech_locale.dart';
+import 'offline/offline_whisper_api.dart';
+import 'offline/offline_whisper_stub.dart'
+    if (dart.library.io) 'offline/offline_whisper_io.dart';
 import 'web_stt/web_offline_stt.dart';
+
+export 'web_stt/web_offline_stt_types.dart' show OfflineSttException;
 
 /// Voix native du téléphone : gratuite, fonctionne même en zone
 /// à faible connectivité (contrairement à une API TTS/STT cloud).
@@ -16,6 +21,7 @@ import 'web_stt/web_offline_stt.dart';
 class VoiceService {
   final FlutterTts _tts = FlutterTts();
   final stt.SpeechToText _stt = stt.SpeechToText();
+  final OfflineWhisper _offlineWhisper = OfflineWhisperStt();
   bool _sttReady = false;
 
   // Dans speech_to_text 7.x, les erreurs se signalent via le callback
@@ -124,6 +130,7 @@ class VoiceService {
   Future<String> listenOnce({
     bool onDevice = false,
     String localeId = 'en_US',
+    void Function(OfflineWhisperStatus status)? onOfflineStatus,
   }) async {
     // Web + hors ligne : le navigateur envoie sinon l'audio à un serveur
     // (l'option `onDevice` de speech_to_text n'a pas d'effet sur le web).
@@ -136,6 +143,12 @@ class VoiceService {
         );
       }
       return _webOffline.listenOnce();
+    }
+    if (onDevice) {
+      return _offlineWhisper.listenOnce(
+        languageCode: localeId.toLowerCase().startsWith('yo') ? 'yo' : 'en',
+        onStatus: onOfflineStatus,
+      );
     }
 
     if (!_sttReady) {
@@ -207,17 +220,17 @@ class VoiceService {
         );
         if (res.finalResult) _completeSession();
       },
-      localeId: resolvedLocaleId,
       listenOptions: stt.SpeechListenOptions(
+        localeId: resolvedLocaleId,
         onDevice: onDevice,
+        listenFor: const Duration(seconds: 20),
+        pauseFor: const Duration(seconds: 5),
         // Le mode par défaut d'Android considère souvent qu'il n'y a "pas
         // de parole" après à peine 1-2 secondes de silence, avant même que
         // l'utilisateur ait commencé à parler. Le mode dictée est plus
         // patient sur ce délai initial.
         listenMode: stt.ListenMode.dictation,
       ),
-      listenFor: const Duration(seconds: 20),
-      pauseFor: const Duration(seconds: 5),
     );
 
     // Attend la vraie fin de session (résultat final, statut done, erreur),
@@ -323,5 +336,14 @@ class VoiceService {
     _completeSession();
     _stt.stop();
     _tts.stop();
+    unawaited(_disposeOfflineWhisper());
+  }
+
+  Future<void> _disposeOfflineWhisper() async {
+    try {
+      await _offlineWhisper.dispose();
+    } catch (error) {
+      debugPrint('Could not dispose offline Whisper: $error');
+    }
   }
 }
