@@ -22,15 +22,16 @@ tool and does not replace clinical supervision or local medical protocols.
 
 ## Conversation modes
 
-| Mode | Patient responses | Speech input | Network use |
+| Mode | Patient responses and selection | Speech input | Network use |
 |---|---|---|---|
 | Live | Gemini Live | Audio is streamed to Gemini; text input is also available. | Internet required. |
-| Offline | A local, scenario-specific dialogue tree; no generative model is used for the reply. | Native builds use Whisper on-device after its model is installed. Text input is also available. | The first Whisper model download requires internet. Conversation speech recognition then runs locally. Firebase may still synchronize profile or session data when connectivity is available. |
+| Offline | The patient uses prewritten, scenario-specific replies. For English, the Gecko embedding model helps select the matching reply after keyword matching; if it is unavailable or uncertain, keyword matching is used. For Yorùbá, selection uses keyword matching. The embedding model selects a reply; it does not generate one. | Native builds use Whisper on-device after its model is installed. Text input is also available. | The first Whisper model download requires internet; the separate Gecko embedding model also needs to be downloaded before semantic matching can be used. Speech recognition and patient-response selection then run locally. Firebase may still synchronize profile or session data when connectivity is available. |
 
-Offline conversation quality depends on the scenario's authored branches and
-question-matching data. The local patient does not invent new responses. If
-the embedding model or its native runtime cannot be used, keyword matching
-remains available.
+Offline conversation quality depends on the scenario's authored replies and
+question-matching data. The local patient does not invent new responses. In
+English, semantic matching is applied only when the embedding model and its
+native runtime are available; otherwise, and for Yorùbá, the app uses keyword
+matching.
 
 ### Offline Whisper speech recognition
 
@@ -53,8 +54,11 @@ offline capabilities.
 
 ### Offline embedding model
 
-The optional Gecko 110M quantized embedding model is downloaded separately
-when the offline dialogue matcher is prepared. It is distributed under the
+The Gecko 110M quantized embedding model is downloaded separately from the
+Whisper speech-recognition model. In English offline conversations, it helps
+match the agent's question to a prewritten patient response; it does not
+generate the response. Yorùbá response selection currently uses keyword
+matching instead. Gecko is distributed under the
 Apache-2.0 license from
 [litert-community/Gecko-110m-en](https://huggingface.co/litert-community/Gecko-110m-en).
 The download requires a connection and is retained in plugin-managed local
