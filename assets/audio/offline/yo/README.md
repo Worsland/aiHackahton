@@ -1,22 +1,21 @@
-# Enregistrements audio yorùbá
+# Yorùbá Audio Recordings
 
-Place chaque réponse du patient dans le dossier correspondant à son apparence.
-Le nom du fichier doit reprendre exactement l'identifiant indiqué ci-dessous :
+Place each patient response in the folder matching the patient's appearance.
+The filename must use exactly the identifier shown below:
 
 ```text
-assets/audio/offline/yo/<apparence>/<identifiant>.mp3
+assets/audio/offline/yo/<appearance>/<identifier>.mp3
 ```
 
-Exemple : `assets/audio/offline/yo/woman_mature/duree.mp3`.
+Example: `assets/audio/offline/yo/woman_mature/duree.mp3`.
 
-Les 26 fichiers ci-dessous couvrent toutes les réponses des trois scénarios
-yorùbá intégrés : les réponses aux points clés, les réponses de repli
-(`fallback`) et les réponses quand une question est répétée (`repeat`).
-Enregistrez le texte de la colonne « Texte à dire » tel quel.
+The 26 files below cover all responses for the three built-in Yorùbá
+scenarios: key-point responses, fallback responses, and responses to repeated
+questions. Record the text in the "Spoken text" column exactly as written.
 
-## Enfant avec de la fièvre — apparence `woman_mature`
+## Child with a Fever — appearance `woman_mature`
 
-| Identifiant | Emplacement du fichier | Texte à dire |
+| Identifier | File path | Spoken text |
 |---|---|---|
 | `duree` | `assets/audio/offline/yo/woman_mature/duree.mp3` | Ọjọ́ méjì ni, ibà náà kò tíì lọ. |
 | `moustiquaire` | `assets/audio/offline/yo/woman_mature/moustiquaire.mp3` | Ó máa ń sùn lábẹ́ àwọ̀n ẹ̀fọn, ṣùgbọ́n ihò kan wà nínú rẹ̀. |
@@ -28,9 +27,9 @@ Enregistrez le texte de la colonne « Texte à dire » tel quel.
 | `repeat_0` | `assets/audio/offline/yo/woman_mature/repeat_0.mp3` | Mo ti sọ fún yín tẹ́lẹ̀. |
 | `repeat_1` | `assets/audio/offline/yo/woman_mature/repeat_1.mp3` | Bẹ́ẹ̀ ni, gẹ́gẹ́ bí mo ṣe sọ tẹ́lẹ̀. |
 
-## Saignement après l'accouchement — apparence `woman`
+## Postpartum Bleeding — appearance `woman`
 
-| Identifiant | Emplacement du fichier | Texte à dire |
+| Identifier | File path | Spoken text |
 |---|---|---|
 | `delai_accouchement` | `assets/audio/offline/yo/woman/delai_accouchement.mp3` | Mo bí ọmọ ní ọjọ́ márùn-ún sẹ́yìn nílé. |
 | `quantite` | `assets/audio/offline/yo/woman/quantite.mp3` | Ẹ̀jẹ̀ náà ti pọ̀ sí i; mo ń yí aṣọ padà lọ́pọ̀ ìgbà. |
@@ -42,9 +41,9 @@ Enregistrez le texte de la colonne « Texte à dire » tel quel.
 | `repeat_0` | `assets/audio/offline/yo/woman/repeat_0.mp3` | Bẹ́ẹ̀ ni, gẹ́gẹ́ bí mo ti sọ. |
 | `repeat_1` | `assets/audio/offline/yo/woman/repeat_1.mp3` | Mo ti dáhùn ìbéèrè yẹn tẹ́lẹ̀. |
 
-## Déshydratation — apparence `man`
+## Dehydration — appearance `man`
 
-| Identifiant | Emplacement du fichier | Texte à dire |
+| Identifier | File path | Spoken text |
 |---|---|---|
 | `activite` | `assets/audio/offline/yo/man/activite.mp3` | Mo ṣiṣẹ́ ní oko ní gbogbo ọjọ́; ooru pọ̀ gan-an. |
 | `boisson` | `assets/audio/offline/yo/man/boisson.mp3` | Mi ò mu omi púpọ̀ nígbà tí mo ń ṣiṣẹ́. |
@@ -55,12 +54,12 @@ Enregistrez le texte de la colonne « Texte à dire » tel quel.
 | `repeat_0` | `assets/audio/offline/yo/man/repeat_0.mp3` | Mo ṣẹ̀ṣẹ̀ sọ fún yín, àbí bẹ́ẹ̀ kọ́? |
 | `repeat_1` | `assets/audio/offline/yo/man/repeat_1.mp3` | Bẹ́ẹ̀ ni, gẹ́gẹ́ bí mo ti sọ tẹ́lẹ̀. |
 
-## Notes d'enregistrement
+## Recording notes
 
-- Chaque fichier doit être un MP3 et conserver exactement le nom et le chemin
-  du tableau.
-- Les noms `fallback_0`, `fallback_1`, `repeat_0` et `repeat_1` correspondent
-  aux positions des réponses dans le code. Ne réordonnez pas ces réponses sans
-  également adapter les noms de fichiers.
-- La lecture cherche ces fichiers dans le dossier de l'apparence du patient.
-  Aucun enregistrement yorùbá manquant ne sera remplacé par une voix anglaise.
+- Each file must be an MP3 and must use exactly the filename and path shown in
+  the table.
+- The identifiers `fallback_0`, `fallback_1`, `repeat_0`, and `repeat_1`
+  correspond to response positions in the code. Do not reorder these
+  responses unless you also update the filenames.
+- Playback looks for these files in the patient's appearance folder. A
+  missing Yorùbá recording is not replaced with an English voice.
