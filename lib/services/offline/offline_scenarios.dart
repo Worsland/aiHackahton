@@ -264,6 +264,160 @@ class OfflineScenarios {
     ),
   );
 
+  static const yorubaPostpartumBleeding = OfflineScenario(
+    title: 'Saignement post-partum',
+    language: AppLanguage.yoruba,
+    look: PatientLook.woman,
+    keyPoints: [
+      KeyPoint(
+        id: 'delai_accouchement',
+        label: 'Beere ìgbà tí ó ti bí ọmọ',
+        keywords: ['bí ọmọ', 'ọjọ́ mélòó', 'ìgbà wo', 'bímọ'],
+        examples: ['Ọjọ́ mélòó ni ó ti kọjá tí o ti bí ọmọ?'],
+        reply: 'Mo bí ọmọ ní ọjọ́ márùn-ún sẹ́yìn nílé.',
+      ),
+      KeyPoint(
+        id: 'quantite',
+        label: 'Ṣàyẹ̀wò bí ẹ̀jẹ̀ náà ṣe pọ̀ tó',
+        keywords: ['ẹ̀jẹ̀ pọ̀', 'iye ẹ̀jẹ̀', 'aṣọ mélòó', 'pad', 'ń yí aṣọ'],
+        examples: ['Báwo ni ẹ̀jẹ̀ náà ṣe pọ̀ tó?'],
+        reply: 'Ẹ̀jẹ̀ náà ti pọ̀ sí i; mo ń yí aṣọ padà lọ́pọ̀ ìgbà.',
+        critical: true,
+      ),
+      KeyPoint(
+        id: 'fievre',
+        label: 'Beere bóyá ibà tàbí ìgbọ̀n wà',
+        keywords: ['ibà', 'gbóná', 'ìgbọ̀n', 'otútù'],
+        examples: ['Ṣé ara rẹ̀ ti gbóná tàbí o ti ní ìgbọ̀n?'],
+        reply: 'Mo ti ń gbóná díẹ̀ láti àná.',
+        critical: true,
+      ),
+      KeyPoint(
+        id: 'odeur',
+        label: 'Beere bóyá ìtújáde náà ní òórùn àjèjì',
+        keywords: ['òórùn', 'ń rùn', 'rùn búburú', 'ìtújáde'],
+        examples: ['Ṣé o ti ṣàkíyèsí òórùn àjèjì nínú ẹ̀jẹ̀ náà?'],
+        reply: 'Bẹ́ẹ̀ ni, ó dà bí ẹni pé ó ń rùn díẹ̀ láti òní.',
+        critical: true,
+      ),
+      KeyPoint(
+        id: 'douleur',
+        label: 'Beere bóyá inú tàbí ikùn ń dùn',
+        keywords: ['inú ń dùn', 'ikùn ń dùn', 'ìrora inú', 'ìrora ìsàlẹ̀'],
+        examples: ['Ṣé inú rẹ ń dùn tàbí o ní ìrora ní ìsàlẹ̀ ikùn?'],
+        reply: 'Inú ìsàlẹ̀ ikùn mi ń dùn bí ìfúnpọ̀.',
+      ),
+    ],
+    fallbackReplies: [
+      'Ẹ jọ̀ọ́, ó ṣòro fún mi láti sọ̀rọ̀ nípa rẹ̀.',
+      'Mi ò lóye dáadáa; ẹ jọ̀ọ́ tún béèrè.',
+    ],
+    repeatReplies: [
+      'Bẹ́ẹ̀ ni, gẹ́gẹ́ bí mo ti sọ.',
+      'Mo ti dáhùn ìbéèrè yẹn tẹ́lẹ̀.',
+    ],
+    clinicalInfo: ScenarioClinicalInfo(
+      displayTitle: 'Ìyá tuntun lẹ́yìn ìbímọ',
+      correctDiagnosis: 'Ìfura sí àkóràn inú lẹ́yìn ìbímọ',
+      distractors: [
+        'Ìmúbọ̀sípò déédé lẹ́yìn ìbímọ',
+        'Àrùn ìdọ̀tí inú',
+        'Àkóràn ọ̀nà ito',
+      ],
+      alertSigns: [
+        AlertSign(
+          trigger: 'Ẹ̀jẹ̀ tàbí ìtújáde tó ní òórùn àjèjì',
+          cause: 'Ó lè jẹ́ àmì àkóràn; a nílò àyẹ̀wò.',
+        ),
+        AlertSign(
+          trigger: 'Ibà pẹ̀lú ẹ̀jẹ̀ tó pọ̀',
+          cause: 'Ó lè fi hàn pé ìṣòro kan wà lẹ́yìn ìbímọ.',
+        ),
+        AlertSign(
+          trigger: 'Ìrora inú ìsàlẹ̀',
+          cause: 'Ó yẹ kí òṣìṣẹ́ ìlera ṣàyẹ̀wò rẹ̀.',
+        ),
+      ],
+      symptoms: ['Ibà', 'Ẹ̀jẹ̀ tó pọ̀', 'Òórùn àjèjì', 'Ìrora inú ìsàlẹ̀'],
+      management:
+          'Tọ́ka sí ilé ìwòsàn kíákíá fún àyẹ̀wò àti ìtọju. Èyí jẹ́ àlàyé ìdánilẹ́kọ̀ọ́; tẹ̀lé ìlànà ìlera agbègbè.',
+    ),
+  );
+
+  static const yorubaDehydration = OfflineScenario(
+    title: 'Déshydratation',
+    language: AppLanguage.yoruba,
+    look: PatientLook.man,
+    keyPoints: [
+      KeyPoint(
+        id: 'activite',
+        label: 'Beere ohun tí ó ń ṣe kí àwọn àmì náà tó bẹ̀rẹ̀',
+        keywords: ['iṣẹ́', 'oko', 'òòrùn', 'ooru', 'gbóná', 'ṣiṣẹ́'],
+        examples: ['Kí ni o ń ṣe kí ara rẹ tó bẹ̀rẹ̀ sí í yá?'],
+        reply: 'Mo ṣiṣẹ́ ní oko ní gbogbo ọjọ́; ooru pọ̀ gan-an.',
+      ),
+      KeyPoint(
+        id: 'boisson',
+        label: 'Beere bóyá ó mu omi tó pọ̀',
+        keywords: ['mu omi', 'omi mélòó', 'mu tó', 'omi', 'mu'],
+        examples: ['Omi mélòó ni o mu lónìí?'],
+        reply: 'Mi ò mu omi púpọ̀ nígbà tí mo ń ṣiṣẹ́.',
+        critical: true,
+      ),
+      KeyPoint(
+        id: 'urines',
+        label: 'Beere nípa ìgbà tí ó ń tọ̀',
+        keywords: ['tọ̀', 'ito', 'ìgbà mélòó', 'ilé ìgbọ̀nsẹ̀'],
+        examples: ['Ìgbà wo ni o gbẹ̀yìn tọ̀?'],
+        reply: 'Mo rò pé mi ò tíì tọ̀ láti òwúrọ̀, tàbí díẹ̀ péré.',
+        critical: true,
+      ),
+      KeyPoint(
+        id: 'symptomes',
+        label: 'Ṣàyẹ̀wò bóyá ó ní ìríra orí tàbí ìfúnpọ̀ iṣan',
+        keywords: ['ríra orí', 'orí ń yí', 'ìfúnpọ̀', 'iṣan', 'rẹ̀wẹ̀sì', 'dákú'],
+        examples: ['Ṣé orí rẹ máa ń yí nígbà tí o bá dìde?'],
+        reply: 'Iṣan ẹsẹ̀ mi máa ń fà, orí mi sì máa ń yí nígbà tí mo bá dìde.',
+      ),
+    ],
+    fallbackReplies: [
+      'Kò burú, dókítà; ó ṣeé ṣe kó jẹ́ àárẹ̀ iṣẹ́.',
+      'Mi ò mọ ohun míì láti sọ.',
+    ],
+    repeatReplies: [
+      'Mo ṣẹ̀ṣẹ̀ sọ fún yín, àbí bẹ́ẹ̀ kọ́?',
+      'Bẹ́ẹ̀ ni, gẹ́gẹ́ bí mo ti sọ tẹ́lẹ̀.',
+    ],
+    clinicalInfo: ScenarioClinicalInfo(
+      displayTitle: 'Agbẹ̀ kan tí ó rẹ̀ lẹ́yìn iṣẹ́ ní oko',
+      correctDiagnosis: 'Ìfura sí àìtó omi àti àárẹ̀ ooru',
+      distractors: [
+        'Àárẹ̀ iṣan lasan',
+        'Súgà ẹ̀jẹ̀ tó kéré',
+        'Ìbẹ̀rẹ̀ àìsàn gágá',
+      ],
+      alertSigns: [
+        AlertSign(
+          trigger: 'Kò tọ̀ láti òwúrọ̀',
+          cause: 'Ó lè jẹ́ àmì pé omi ara kò tó.',
+        ),
+        AlertSign(
+          trigger: 'Ìfúnpọ̀ iṣan àti orí yíyí',
+          cause: 'Ó lè ṣẹlẹ̀ nígbà tí ara bá pàdánù omi.',
+        ),
+      ],
+      symptoms: [
+        'Àìlera',
+        'Ìfúnpọ̀ iṣan',
+        'Orí yíyí',
+        'Òùngbẹ púpọ̀',
+        'Ito díẹ̀ tàbí tó dúdú',
+      ],
+      management:
+          'Gbe e sí ibòji, fún un ní omi tàbí O.R.S. gẹ́gẹ́ bí ìlànà agbègbè, kí ó sì sinmi. Ìdàrúdàpọ̀ ọpọlọ tàbí àìgbọ̀n yẹ kí a tọ́ka sí ìtọju pajawiri.',
+    ),
+  );
+
   static const postpartumBleeding = OfflineScenario(
     title: 'Saignement post-partum',
     look: PatientLook.woman,
@@ -498,6 +652,12 @@ class OfflineScenarios {
   }) {
     if (language.isYoruba && title == feverChild.title) {
       return yorubaFeverChild;
+    }
+    if (language.isYoruba && title == postpartumBleeding.title) {
+      return yorubaPostpartumBleeding;
+    }
+    if (language.isYoruba && title == dehydration.title) {
+      return yorubaDehydration;
     }
     for (final s in all) {
       if (s.title == title) return s;

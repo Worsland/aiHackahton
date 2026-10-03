@@ -7,6 +7,7 @@ import '../services/gemini_service.dart';
 import '../services/firebase/auth_service.dart';
 import '../services/live/gemini_live_service.dart';
 import '../services/lang/app_language.dart';
+import '../services/lang/app_language_controller.dart';
 import '../services/offline/offline_patient_brain.dart';
 import '../services/offline/offline_voice_player.dart';
 import '../services/offline/offline_scenarios.dart';
@@ -85,6 +86,8 @@ class SimulationScreen extends StatefulWidget {
 ///  - [offline] : arbre de dialogue local, aucun réseau requis (mobile).
 enum ConversationMode { live, offline }
 
+enum _OfflineAiSetupResult { enabled, withoutAi, runtimeUnavailable }
+
 class _SimulationScreenState extends State<SimulationScreen> {
   final VoiceService _voice = VoiceService();
   late final OfflineVoicePlayer _offlineVoice = OfflineVoicePlayer(
@@ -99,7 +102,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
   /// Le mode "naturel" (Gemini Live, ancien bool `_liveMode = true`) reste
   /// utilisable ailleurs dans le fichier via `_mode == ConversationMode.live`.
   ConversationMode _mode = ConversationMode.live;
-  AppLanguage _language = AppLanguage.english;
+  AppLanguage _language = AppLanguageController.instance.language;
 
   /// Cerveau hors-ligne pour le scénario en cours (arbre de dialogue local,
   /// aucun réseau). `null` si ce scénario n'a pas encore de version
@@ -113,6 +116,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
   bool _offlineAiPreparing = false;
   bool _offlineAiUnavailable = false;
   bool _offlineAiSkipped = false;
+  bool _offlineEmbeddingRuntimeUnavailable = false;
 
   final List<_Turn> _transcript = [];
 
@@ -162,9 +166,13 @@ class _SimulationScreenState extends State<SimulationScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          added > 0
-              ? '$added new scenario${added > 1 ? "s" : ""} added.'
-              : 'Scenarios are up to date.',
+          _language.isYoruba
+              ? (added > 0
+                    ? 'A ti fi àpẹẹrẹ tuntun $added kún un.'
+                    : 'Gbogbo àpẹẹrẹ ti wà ní ìsinsìnyí.')
+              : (added > 0
+                    ? '$added new scenario${added > 1 ? "s" : ""} added.'
+                    : 'Scenarios are up to date.'),
         ),
       ),
     );
@@ -189,7 +197,9 @@ class _SimulationScreenState extends State<SimulationScreen> {
       SnackBar(
         content: Text(
           _offlineAvailable
-              ? '$message You can switch to offline mode (icon at the top).'
+              ? (_language.isYoruba
+                    ? '$message O lè yí padà sí offline nípa lílo àmì tó wà lókè.'
+                    : '$message You can switch to offline mode (icon at the top).')
               : message,
         ),
       ),
@@ -324,16 +334,20 @@ class _SimulationScreenState extends State<SimulationScreen> {
       });
     }
 
+    var runtimeUnavailable = false;
     try {
       final embedder = await _loadOfflineEmbedder();
       await brain.enableSemantic(embedder);
     } catch (error) {
       debugPrint('Offline semantic AI unavailable: $error');
+      runtimeUnavailable = _isLiteRtEmbeddingLoadError(error);
       if (mounted &&
           identical(_offlineBrain, brain) &&
           _mode == ConversationMode.offline) {
         _showSnack(
-          'On-device AI unavailable ($error); using basic offline matching.',
+          runtimeUnavailable
+              ? _offlineEmbeddingFallbackMessage
+              : 'On-device AI unavailable ($error); using basic offline matching.',
         );
       }
     } finally {
@@ -341,9 +355,23 @@ class _SimulationScreenState extends State<SimulationScreen> {
         setState(() {
           _offlineAiPreparing = false;
           _offlineAiUnavailable = !brain.semanticEnabled;
+          if (runtimeUnavailable) {
+            _offlineAiEnabled = false;
+            _offlineEmbeddingRuntimeUnavailable = true;
+          }
         });
       }
     }
+  }
+
+  String get _offlineEmbeddingFallbackMessage => _language.isYoruba
+      ? 'A kò lè ṣí embeddings lórí ẹ̀rọ yìí. A ń bá a lọ offline pẹ̀lú ìbámu ọ̀rọ̀.'
+      : 'On-device embeddings could not be loaded. Continuing offline with keyword matching.';
+
+  bool _isLiteRtEmbeddingLoadError(Object error) {
+    final message = error.toString().toLowerCase();
+    return message.contains('liblitertlm.so') &&
+        message.contains('failed to load');
   }
 
   Future<void> _recordAndSend() async {
@@ -361,12 +389,21 @@ class _SimulationScreenState extends State<SimulationScreen> {
     try {
       heard = await _voice.listenOnce(
         onDevice: _mode == ConversationMode.offline,
+        localeId: _language.speechLocaleId,
       );
     } on OfflineSttException catch (e) {
       _showSnack(e.message);
+    } catch (error) {
+      debugPrint('Speech recognition failed: $error');
+      _showSnack(
+        _language.isYoruba
+            ? 'A kò lè dá ohùn mọ̀. Jọ̀ọ́ lo pátákó ìkọ̀wé.'
+            : 'Speech recognition failed. Please use the keyboard.',
+      );
+    } finally {
+      if (mounted) setState(() => _isListening = false);
     }
     if (!mounted) return;
-    setState(() => _isListening = false);
     await _handleAgentUtterance(heard);
   }
 
@@ -439,14 +476,28 @@ class _SimulationScreenState extends State<SimulationScreen> {
         _isBusy = false;
         _isSpeaking = true;
       });
-      if (offlineReply != null && !_language.isYoruba) {
-        await _offlineVoice.speak(_clinicalData!.look, offlineReply);
+      if (offlineReply != null) {
+        await _offlineVoice.speak(
+          _clinicalData!.look,
+          offlineReply,
+          language: _language,
+        );
       } else if (offlineReply == null) {
         await _voice.speak(replyText);
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _transcript.add(_Turn('Error: $e', isAgent: false)));
+        debugPrint('Patient response failed: $e');
+        setState(
+          () => _transcript.add(
+            _Turn(
+              _language.isYoruba
+                  ? 'Aṣìṣe kan ṣẹlẹ̀ nígbà tí aláìsàn ń dáhùn.'
+                  : 'The patient could not respond. Please try again.',
+              isAgent: false,
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -498,6 +549,22 @@ class _SimulationScreenState extends State<SimulationScreen> {
             'Àkọsílẹ̀ Yorùbá jẹ́ àkọ́kọ́; a ó tún yẹ̀ ẹ́ wò. '
             'Ìdáhùn jẹ́ ọ̀rọ̀ nìkan; a kò tíì fi ohùn Yorùbá kún un.';
       }
+      final count =
+          '${_offlineBrain?.askedKeyPoints.length ?? 0}/'
+          '${_offlineBrain?.scenario.keyPoints.length ?? 0}';
+      if (_language.isYoruba) {
+        final aiStatus = _offlineAiPreparing
+            ? 'AI ẹ̀rọ ń múra… '
+            : _offlineBrain?.semanticEnabled == true
+            ? 'AI ẹ̀rọ ti ṣiṣẹ́. '
+            : _offlineAiUnavailable
+            ? 'Ìbámu ọ̀rọ̀ nìkan: AI kò sí. '
+            : _offlineAiSkipped
+            ? 'Ìbámu ọ̀rọ̀ nìkan: a kò yan AI. '
+            : 'Ìbámu ọ̀rọ̀ nìkan. ';
+        return 'Offline · kò sí dátà tí a fi ránṣẹ́ · $aiStatus'
+            '$count àwọn kókó pàtàkì ni a ti béèrè.';
+      }
       final aiStatus = _offlineAiPreparing
           ? 'Preparing on-device AI… '
           : _offlineBrain?.semanticEnabled == true
@@ -507,15 +574,20 @@ class _SimulationScreenState extends State<SimulationScreen> {
           : _offlineAiSkipped
           ? 'Keyword matching: AI not selected. '
           : 'Keyword matching: on-device AI not enabled. ';
-      return 'Offline mode · no data sent · $aiStatus'
-          '${_offlineBrain?.askedKeyPoints.length ?? 0}/'
-          '${_offlineBrain?.scenario.keyPoints.length ?? 0} key points covered.';
+      return 'Offline mode · no data sent · $aiStatus$count key points covered.';
     }
     if (_mode == ConversationMode.live) {
       switch (_live.state) {
         case LiveState.connecting:
+          if (_language.isYoruba) return 'Ó ń so pọ̀ mọ́ aláìsàn…';
           return 'Connecting to the patient…';
         case LiveState.live:
+          if (_language.isYoruba) {
+            if (_live.patientSpeaking) return 'Aláìsàn ń dáhùn…';
+            if (_live.agentSpeaking) return 'Mo ń fetí sílẹ̀…';
+            if (_live.waitingReply) return 'Aláìsàn ń ronú…';
+            return 'Ìfọ̀rọ̀wánilẹ́nuwò ń lọ: sọ̀rọ̀ ní ti ara rẹ.';
+          }
           if (_live.patientSpeaking) {
             return 'The patient is answering… (tap them to interrupt)';
           }
@@ -527,9 +599,19 @@ class _SimulationScreenState extends State<SimulationScreen> {
           return _scenario!.description;
       }
     }
-    if (_isListening) return 'I\'m listening…';
-    if (_isSpeaking) return 'The patient is answering…';
-    if (_isBusy) return 'The patient is thinking…';
+    if (_isListening) {
+      return _language.isYoruba ? 'Mo ń fetí sílẹ̀…' : 'I\'m listening…';
+    }
+    if (_isSpeaking) {
+      return _language.isYoruba
+          ? 'Aláìsàn ń dáhùn…'
+          : 'The patient is answering…';
+    }
+    if (_isBusy) {
+      return _language.isYoruba
+          ? 'Aláìsàn ń ronú…'
+          : 'The patient is thinking…';
+    }
     return _scenario!.description;
   }
 
@@ -568,6 +650,16 @@ class _SimulationScreenState extends State<SimulationScreen> {
       return;
     }
 
+    if (_offlineEmbeddingRuntimeUnavailable) {
+      setState(() {
+        _mode = ConversationMode.offline;
+        _offlineAiEnabled = false;
+        _offlineAiUnavailable = true;
+        _offlineAiSkipped = false;
+      });
+      return;
+    }
+
     if (_offlineAiEnabled && _offlineEmbedderFuture != null) {
       setState(() => _mode = ConversationMode.offline);
       unawaited(_prepareOfflineBrain(brain));
@@ -580,9 +672,21 @@ class _SimulationScreenState extends State<SimulationScreen> {
     try {
       await initialization;
       installedEmbedder = await loadInstalledEmbedder();
-    } catch (_) {
+    } catch (error) {
       if (identical(_offlineGemmaInitialization, initialization)) {
         _offlineGemmaInitialization = null;
+      }
+      if (_isLiteRtEmbeddingLoadError(error)) {
+        if (!mounted) return;
+        setState(() {
+          _mode = ConversationMode.offline;
+          _offlineAiEnabled = false;
+          _offlineAiUnavailable = true;
+          _offlineAiSkipped = false;
+          _offlineEmbeddingRuntimeUnavailable = true;
+        });
+        _showSnack(_offlineEmbeddingFallbackMessage);
+        return;
       }
     }
     if (!mounted) return;
@@ -598,19 +702,28 @@ class _SimulationScreenState extends State<SimulationScreen> {
       return;
     }
 
-    final useOfflineAi = await _showOfflineAiSetupDialog(brain);
-    if (!mounted || useOfflineAi == null) return;
+    final setupResult = await _showOfflineAiSetupDialog(brain);
+    if (!mounted || setupResult == null) return;
     setState(() {
       _mode = ConversationMode.offline;
-      _offlineAiEnabled = useOfflineAi;
-      _offlineAiUnavailable = false;
-      _offlineAiSkipped = !useOfflineAi;
+      _offlineAiEnabled = setupResult == _OfflineAiSetupResult.enabled;
+      _offlineAiUnavailable =
+          setupResult == _OfflineAiSetupResult.runtimeUnavailable;
+      _offlineAiSkipped = setupResult == _OfflineAiSetupResult.withoutAi;
+      _offlineEmbeddingRuntimeUnavailable =
+          setupResult == _OfflineAiSetupResult.runtimeUnavailable;
     });
-    if (useOfflineAi) unawaited(_prepareOfflineBrain(brain));
+    if (setupResult == _OfflineAiSetupResult.runtimeUnavailable) {
+      _showSnack(_offlineEmbeddingFallbackMessage);
+    } else if (setupResult == _OfflineAiSetupResult.enabled) {
+      unawaited(_prepareOfflineBrain(brain));
+    }
   }
 
-  Future<bool?> _showOfflineAiSetupDialog(OfflinePatientBrain brain) {
-    return showDialog<bool>(
+  Future<_OfflineAiSetupResult?> _showOfflineAiSetupDialog(
+    OfflinePatientBrain brain,
+  ) {
+    return showDialog<_OfflineAiSetupResult>(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) {
@@ -624,15 +737,19 @@ class _SimulationScreenState extends State<SimulationScreen> {
           builder: (context, setDialogState) => PopScope(
             canPop: !downloading,
             child: AlertDialog(
-              title: const Text('Préparer le mode offline'),
+              title: Text(
+                _language.isYoruba
+                    ? 'Mú offline sílẹ̀'
+                    : 'Prepare offline mode',
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Télécharger une fois le modèle IA (environ 115 Mo). '
-                    'Ensuite, les questions seront traitées sur ce téléphone, '
-                    'même sans connexion.',
+                  Text(
+                    _language.isYoruba
+                        ? 'Gba àwòṣe AI (ìwọ̀n 115 MB) sí ẹ̀rọ lẹ́ẹ̀kan. Lẹ́yìn náà, ẹ̀rọ yìí yóò dáhùn láìsí ìsopọ̀.'
+                        : 'Download the AI model once (about 115 MB). Questions will then be processed on this phone, even without a connection.',
                   ),
                   if (downloading) ...[
                     const SizedBox(height: 20),
@@ -661,18 +778,26 @@ class _SimulationScreenState extends State<SimulationScreen> {
                                 cancelToken?.cancel('User cancelled download');
                                 setDialogState(() {});
                               })
-                      : () => Navigator.of(dialogContext).pop(false),
+                      : () => Navigator.of(
+                          dialogContext,
+                        ).pop(_OfflineAiSetupResult.withoutAi),
                   child: Text(
                     downloading
-                        ? (cancelRequested ? 'Annulation…' : 'Annuler')
-                        : 'Continuer sans IA',
+                        ? (cancelRequested
+                              ? (_language.isYoruba
+                                    ? 'Ó ń fagilé…'
+                                    : 'Cancelling…')
+                              : (_language.isYoruba ? 'Fagilé' : 'Cancel'))
+                        : (_language.isYoruba
+                              ? 'Tẹ̀síwájú láìsí AI'
+                              : 'Continue without AI'),
                   ),
                 ),
                 TextButton(
                   onPressed: downloading
                       ? null
                       : () => Navigator.of(dialogContext).pop(null),
-                  child: const Text('Plus tard'),
+                  child: Text(_language.isYoruba ? 'Lẹ́yìn náà' : 'Later'),
                 ),
                 FilledButton(
                   onPressed: downloading
@@ -696,20 +821,36 @@ class _SimulationScreenState extends State<SimulationScreen> {
                             );
                             await brain.enableSemantic(embedder);
                             if (dialogContext.mounted) {
-                              Navigator.of(dialogContext).pop(true);
+                              Navigator.of(
+                                dialogContext,
+                              ).pop(_OfflineAiSetupResult.enabled);
                             }
                           } catch (error) {
                             if (!dialogContext.mounted) return;
+                            if (_isLiteRtEmbeddingLoadError(error)) {
+                              Navigator.of(
+                                dialogContext,
+                              ).pop(_OfflineAiSetupResult.runtimeUnavailable);
+                              return;
+                            }
                             setDialogState(() {
                               downloading = false;
                               errorMessage = CancelToken.isCancel(error)
-                                  ? 'Téléchargement annulé. Tu peux continuer sans le modèle.'
-                                  : 'Impossible de charger le modèle : $error';
+                                  ? (_language.isYoruba
+                                        ? 'A fagilé gbígbà àwòṣe. O lè tẹ̀síwájú láìsí i.'
+                                        : 'Download cancelled. You can continue without the model.')
+                                  : (_language.isYoruba
+                                        ? 'A kò lè ṣí àwòṣe: $error'
+                                        : 'Could not load model: $error');
                             });
                           }
                         },
                   child: Text(
-                    downloading ? 'Téléchargement…' : 'Télécharger / charger',
+                    downloading
+                        ? (_language.isYoruba ? 'Ó ń gbà…' : 'Downloading…')
+                        : (_language.isYoruba
+                              ? 'Gba / ṣí àwòṣe'
+                              : 'Download / load'),
                   ),
                 ),
               ],
@@ -780,7 +921,14 @@ class _SimulationScreenState extends State<SimulationScreen> {
     // voir `_groupedScenarioItems`.
     final availableScenarios = _language.isYoruba
         ? PatientScenario.examples
-              .where((s) => s.title == OfflineScenarios.feverChild.title)
+              .where(
+                (s) =>
+                    OfflineScenarios.forTitle(
+                      s.title,
+                      language: AppLanguage.yoruba,
+                    ) !=
+                    null,
+              )
               .toList()
         : ScenarioCatalog.instance.scenarios;
     final pickerItems = _groupedScenarioItems(
@@ -862,6 +1010,9 @@ class _SimulationScreenState extends State<SimulationScreen> {
                           }
                           _language = language;
                         });
+                        unawaited(
+                          AppLanguageController.instance.setLanguage(language),
+                        );
                       },
                     ),
                   ),
@@ -927,7 +1078,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
         body: SafeArea(
           child: Row(
             children: [
-              _NavSidebar(entries: _navEntries(context)),
+              _NavSidebar(entries: _navEntries(context), language: _language),
               Expanded(child: content),
             ],
           ),
@@ -957,13 +1108,13 @@ class _SimulationScreenState extends State<SimulationScreen> {
           Builder(
             builder: (context) => IconButton(
               icon: const Icon(Icons.menu_rounded),
-              tooltip: 'Menu',
+              tooltip: _language.isYoruba ? 'Àkójọ aṣàyàn' : 'Menu',
               onPressed: () => Scaffold.of(context).openEndDrawer(),
             ),
           ),
         ],
       ),
-      endDrawer: _NavDrawer(entries: _navEntries(context)),
+      endDrawer: _NavDrawer(entries: _navEntries(context), language: _language),
       body: content,
     );
   }
@@ -974,26 +1125,32 @@ class _SimulationScreenState extends State<SimulationScreen> {
     return [
       _NavEntry(
         icon: Icons.person_outline_rounded,
-        label: 'My profile',
+        label: _language.isYoruba ? 'Profaili mi' : 'My profile',
         // Nom, prénom, photo et scores : voir profile_screen.dart. La
         // liaison de compte (email/déconnexion) reste dans AccountScreen,
         // accessible depuis cet écran plutôt que dupliquée ici.
-        onTap: () => Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (context) => const ProfileScreen())),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ProfileScreen(language: _language),
+          ),
+        ),
       ),
       _NavEntry(
         icon: Icons.insights_rounded,
-        label: 'My progress',
-        onTap: () => Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (context) => const ProgressScreen())),
+        label: _language.isYoruba ? 'Ìlọsíwájú mi' : 'My progress',
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ProgressScreen(language: _language),
+          ),
+        ),
       ),
       _NavEntry(
         icon: Icons.sync_rounded,
         label: ScenarioCatalog.instance.isSyncing
-            ? 'Syncing…'
-            : 'Sync scenarios',
+            ? (_language.isYoruba ? 'Ó ń múṣiṣẹ́ pọ̀…' : 'Syncing…')
+            : (_language.isYoruba
+                  ? 'Mú àwọn àpẹẹrẹ ṣiṣẹ́ pọ̀'
+                  : 'Sync scenarios'),
         trailing: ScenarioCatalog.instance.isSyncing
             ? const SizedBox(
                 width: 16,
@@ -1105,7 +1262,10 @@ class _SimulationScreenState extends State<SimulationScreen> {
                   padding: const EdgeInsets.fromLTRB(14, 16, 14, 8),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
-                      (context, i) => _ChatBubble(turn: _transcript[i]),
+                      (context, i) => _ChatBubble(
+                        turn: _transcript[i],
+                        language: _language,
+                      ),
                       childCount: _transcript.length,
                     ),
                   ),
@@ -1161,7 +1321,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
                 // qu'à lire et taper, jamais à parler.
                 _mode == ConversationMode.live
                     ? _buildLiveCallButton()
-                    : _buildOfflineKeyboardIndicator(),
+                    : _buildOfflineMicrophoneControl(),
                 const Spacer(),
                 _buildVerticalSessionActions(),
               ],
@@ -1201,7 +1361,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
                     padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
                     itemCount: _transcript.length,
                     itemBuilder: (context, i) =>
-                        _ChatBubble(turn: _transcript[i]),
+                        _ChatBubble(turn: _transcript[i], language: _language),
                   ),
           ),
           Container(
@@ -1248,7 +1408,11 @@ class _SimulationScreenState extends State<SimulationScreen> {
             textInputAction: TextInputAction.send,
             onSubmitted: (_) => _submitTyped(),
             decoration: InputDecoration(
-              hintText: _isListening ? 'Listening…' : 'Type your question…',
+              hintText: _isListening
+                  ? (_language.isYoruba ? 'Mo ń fetí sílẹ̀…' : 'Listening…')
+                  : (_language.isYoruba
+                        ? 'Kọ ìbéèrè rẹ…'
+                        : 'Type your question…'),
               filled: true,
               fillColor: AppColors.bg,
               contentPadding: const EdgeInsets.symmetric(
@@ -1265,7 +1429,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
         const SizedBox(width: 10),
         IconButton.filled(
           icon: const Icon(Icons.send_rounded),
-          tooltip: 'Send',
+          tooltip: _language.isYoruba ? 'Ránṣẹ́' : 'Send',
           onPressed: _isBusy ? null : _submitTyped,
         ),
       ],
@@ -1384,20 +1548,34 @@ class _SimulationScreenState extends State<SimulationScreen> {
     );
   }
 
-  /// Le mode hors ligne utilise le champ de saisie du panneau de droite.
-  Widget _buildOfflineKeyboardIndicator() {
-    return const Column(
+  /// Microphone de dictée locale sur mobile, distinct de l'appel Live.
+  Widget _buildOfflineMicrophoneControl() {
+    final available = !kIsWeb;
+    return Column(
       children: [
-        Icon(Icons.keyboard_alt_outlined, size: 28),
-        SizedBox(height: 8),
-        Text('Text input only'),
+        _BigCircleButton(
+          icon: _isListening ? Icons.graphic_eq_rounded : Icons.mic_rounded,
+          active: _isListening,
+          onTap: available && !_isBusy && !_isListening ? _recordAndSend : null,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          !available
+              ? (_language.isYoruba
+                    ? 'A kò tíì ṣe STT offline fún ẹ̀rọ aṣàwákiri yìí.'
+                    : 'Offline speech input is unavailable in this browser.')
+              : (_language.isYoruba
+                    ? 'Ọ̀rọ̀ tàbí gbohungbohun · Yorùbá'
+                    : 'Type or speak · on-device'),
+          textAlign: TextAlign.center,
+        ),
       ],
     );
   }
 
   /// Barre de saisie façon messagerie (Messenger/WhatsApp) : un champ de
-  /// texte toujours visible, et une seule icône à droite qui bascule
-  /// avec un bouton d'envoi ; le mode hors ligne n'ouvre pas le micro.
+  /// texte toujours visible, et une seule icône à droite qui bascule entre
+  /// le micro local et l'envoi.
   Widget _buildMessageBar() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -1437,7 +1615,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
             hasText: value.text.trim().isNotEmpty,
             listening: _isListening,
             busy: _isBusy,
-            microphoneEnabled: _mode != ConversationMode.offline,
+            microphoneEnabled: !kIsWeb || !_language.isYoruba,
             onSend: _submitTyped,
             onMic: _recordAndSend,
           ),
@@ -1605,7 +1783,16 @@ class _ScenarioCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       language.isYoruba
-                          ? 'Ìyá kan mú ọmọ ọdún mẹ́rin wá; ọmọ náà ti ní ibà fún ọjọ́ méjì.'
+                          ? switch (scenario.title) {
+                              'Fièvre chez un enfant' =>
+                                'Ìyá kan mú ọmọ ọdún mẹ́rin wá; ọmọ náà ti ní ibà fún ọjọ́ méjì.',
+                              'Saignement post-partum' =>
+                                'Obìnrin kan wá ní ọjọ́ márùn-ún lẹ́yìn ìbímọ pẹ̀lú ẹ̀jẹ̀ tó pọ̀.',
+                              'Déshydratation' =>
+                                'Agbẹ̀ kan rẹ̀ lẹ́yìn ọjọ́ iṣẹ́ ní oko ní ooru.',
+                              _ =>
+                                'Àpẹẹrẹ ìfọ̀rọ̀wánilẹ́nuwò fún ìdánilẹ́kọ̀ọ́.',
+                            }
                           : scenario.description,
                       style: Theme.of(context).textTheme.bodyMedium,
                       maxLines: 2,
@@ -1618,7 +1805,15 @@ class _ScenarioCard extends StatelessWidget {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Chip(
-                          label: Text(visuals.difficulty),
+                          label: Text(
+                            language.isYoruba
+                                ? switch (_difficultyRank(visuals.difficulty)) {
+                                    0 => 'Rọrùn',
+                                    2 => 'Líle',
+                                    _ => 'Àárín',
+                                  }
+                                : visuals.difficulty,
+                          ),
                           backgroundColor: difficultyColor.withValues(
                             alpha: 0.1,
                           ),
@@ -1652,9 +1847,9 @@ class _ScenarioCard extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  'Best ${score.bestPercent}% · '
-                                  '${score.attempts} '
-                                  '${score.attempts > 1 ? 'tries' : 'try'}',
+                                  language.isYoruba
+                                      ? 'Àmì tó ga jù ${score.bestPercent}% · ìgbìyànjú ${score.attempts}'
+                                      : 'Best ${score.bestPercent}% · ${score.attempts} ${score.attempts > 1 ? 'tries' : 'try'}',
                                   style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(fontWeight: FontWeight.w600),
                                 ),
@@ -1681,8 +1876,9 @@ class _ScenarioCard extends StatelessWidget {
 }
 
 class _ChatBubble extends StatelessWidget {
-  const _ChatBubble({required this.turn});
+  const _ChatBubble({required this.turn, required this.language});
   final _Turn turn;
+  final AppLanguage language;
 
   @override
   Widget build(BuildContext context) {
@@ -1713,7 +1909,9 @@ class _ChatBubble extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              isAgent ? '🧑‍⚕️ You' : '🤒 Patient',
+              isAgent
+                  ? (language.isYoruba ? '🧑‍⚕️ Ìwọ' : '🧑‍⚕️ You')
+                  : (language.isYoruba ? '🤒 Aláìsàn' : '🤒 Patient'),
               style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
@@ -1870,10 +2068,11 @@ class _NavEntry {
 /// Pas de vrai profil pour l'instant (nom, photo...) : ça arrivera avec
 /// l'écran Profil dédié, ce bandeau sera alors mis à jour en conséquence.
 class _NavHeader extends StatelessWidget {
-  const _NavHeader({required this.dense});
+  const _NavHeader({required this.dense, required this.language});
 
   /// `true` dans le tiroir mobile (plus compact), `false` dans la sidebar.
   final bool dense;
+  final AppLanguage language;
 
   @override
   Widget build(BuildContext context) {
@@ -1895,12 +2094,21 @@ class _NavHeader extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  linked ? user.email ?? 'My account' : 'Guest session',
+                  linked
+                      ? user.email ??
+                            (language.isYoruba ? 'Àkọọ́lẹ̀ mi' : 'My account')
+                      : (language.isYoruba ? 'Ìbẹ̀wò àlejò' : 'Guest session'),
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 Text(
-                  linked ? 'Progress synced' : 'Progress saved on this device',
+                  linked
+                      ? (language.isYoruba
+                            ? 'Ìlọsíwájú ti ṣiṣẹ́ pọ̀'
+                            : 'Progress synced')
+                      : (language.isYoruba
+                            ? 'A fi ìlọsíwájú pamọ́ sórí ẹ̀rọ yìí'
+                            : 'Progress saved on this device'),
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
@@ -1916,8 +2124,9 @@ class _NavHeader extends StatelessWidget {
 /// Sidebar permanente affichée à gauche sur grand écran (PC, tablette
 /// paysage) : entièrement séparée du bandeau de description de l'app.
 class _NavSidebar extends StatelessWidget {
-  const _NavSidebar({required this.entries});
+  const _NavSidebar({required this.entries, required this.language});
   final List<_NavEntry> entries;
+  final AppLanguage language;
 
   @override
   Widget build(BuildContext context) {
@@ -1932,7 +2141,7 @@ class _NavSidebar extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const _NavHeader(dense: false),
+          _NavHeader(dense: false, language: language),
           const Divider(height: 1),
           const SizedBox(height: 8),
           for (final e in entries) _NavListTile(entry: e),
@@ -1945,8 +2154,9 @@ class _NavSidebar extends StatelessWidget {
 /// Tiroir de navigation sur petit écran, ouvert depuis le bouton menu de
 /// l'AppBar (glisse depuis le bord, ne touche jamais au bandeau vert).
 class _NavDrawer extends StatelessWidget {
-  const _NavDrawer({required this.entries});
+  const _NavDrawer({required this.entries, required this.language});
   final List<_NavEntry> entries;
+  final AppLanguage language;
 
   @override
   Widget build(BuildContext context) {
@@ -1955,7 +2165,7 @@ class _NavDrawer extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const _NavHeader(dense: true),
+            _NavHeader(dense: true, language: language),
             const Divider(height: 1),
             const SizedBox(height: 8),
             for (final e in entries) _NavListTile(entry: e),

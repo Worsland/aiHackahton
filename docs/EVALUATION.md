@@ -49,4 +49,6 @@ locuteurs Yorùbá.
   constituent pas cette comparaison.
 - Tester le parcours complet sur téléphone et en mode avion.
 - Le STT Yorùbá/anglais hors ligne n'est pas inclus dans ce benchmark.
-
+- La reconnaissance vocale locale est reliée au parcours mobile, mais ses
+  langues disponibles et sa qualité n'ont pas encore été vérifiées sur les
+  appareils Android/iOS ciblés. Aucun score audio→STT→matcher n'est revendiqué.

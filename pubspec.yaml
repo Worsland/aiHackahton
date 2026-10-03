@@ -104,6 +104,7 @@ flutter:
       - assets/audio/offline/man/
       - assets/audio/offline/woman/
       - assets/audio/offline/woman_mature/
+      - assets/audio/offline/yo/
       - design/patients/
       - tools/
 

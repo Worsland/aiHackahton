@@ -229,10 +229,11 @@ Les tests Dart du matcher sémantique sont dans `test/semantic_matcher_test.dart
 - Le contenu médical des scénarios est illustratif et doit être révisé par des professionnels avant tout usage réel.
 - L'application n'est pas un outil de diagnostic ou de traitement et ne remplace pas les protocoles locaux.
 - En mode hors ligne, les embeddings rapprochent la question des formulations d'exemple pour sélectionner une réponse préécrite ; ce n'est pas un patient génératif. Le repli par mots-clés et un seuil sémantique non calibré sur des échanges réels peuvent produire une réponse inadaptée.
-- Le prototype Yorùbá couvre uniquement le scénario de fièvre et le texte ; ses formulations et son contenu clinique sont à relire par l'équipe et ne constituent pas une traduction validée.
+- Les trois scénarios intégrés ont maintenant un parcours texte Yorùbá hors ligne. Les formulations et le contenu clinique sont des brouillons à relire ; ils ne constituent pas une traduction ou un protocole validé.
 - Le matcher lexical Yorùbá peut échouer sur des paraphrases, des variantes dialectales ou des mélanges Yorùbá/anglais ; en cas d'ambiguïté ou d'absence de correspondance, l'application demande de reformuler plutôt que de choisir une réponse au hasard.
 - Gecko 110M est un modèle anglais, pas un modèle bilingue ; il n'est pas utilisé pour les questions yoruba.
-- La reconnaissance vocale hors ligne et les réponses audio en yoruba ne sont pas disponibles dans ce prototype.
+- Le bouton micro du mode hors ligne demande une reconnaissance sur l'appareil avec la locale de la langue choisie (`en_US` ou `yo_NG`). La disponibilité dépend du moteur et du pack de langue installé ; si la locale manque, l'app demande d'utiliser le clavier. La prise en charge n'a pas encore été confirmée sur les appareils Android/iOS cibles.
+- Les réponses audio Yorùbá par locuteurs natifs ne sont pas encore fournies. Les chemins attendus sont décrits dans `assets/audio/offline/yo/README.md` ; en leur absence, l'app garde la réponse en texte et ne joue pas l'audio anglais.
 - Le mode Live dépend du réseau, de Gemini et de la disponibilité du modèle configuré dans `lib/services/live/gemini_live_service.dart`.
 - Les fonctionnalités Firebase nécessitent un projet correctement configuré et des règles Firestore sûres.
 - L'authentification anonyme créée pour la première fois et la synchronisation des données requièrent une connexion.

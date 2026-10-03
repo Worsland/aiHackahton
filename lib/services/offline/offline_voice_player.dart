@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 
+import '../lang/app_language.dart';
 import '../../widgets/patient_avatar.dart' show PatientLook;
 import '../voice_service.dart';
 import 'offline_patient_brain.dart';
@@ -29,13 +30,25 @@ class OfflineVoicePlayer {
 
   bool _disposed = false;
 
+  static String assetPathFor(
+    PatientLook look,
+    OfflineReply reply,
+    AppLanguage language,
+  ) => language.isYoruba
+      ? 'audio/offline/yo/${look.assetName}/${reply.audioId}.mp3'
+      : 'audio/offline/${look.assetName}/${reply.audioId}.mp3';
+
   /// Joue la réplique [reply] avec la voix de [look]. Se termine une fois
   /// la lecture (ou la synthèse de repli) achevée, comme
   /// `VoiceService.speak` — l'appelant peut donc s'en servir pour piloter
   /// l'état "le patient parle" de l'avatar de la même façon dans les trois
   /// modes de conversation.
-  Future<void> speak(PatientLook look, OfflineReply reply) async {
-    final assetPath = 'audio/offline/${look.assetName}/${reply.audioId}.mp3';
+  Future<void> speak(
+    PatientLook look,
+    OfflineReply reply, {
+    AppLanguage language = AppLanguage.english,
+  }) async {
+    final assetPath = assetPathFor(look, reply, language);
 
     // Filet de sécurité, quoi qu'il arrive ensuite : jamais les deux voix
     // en même temps. Sans ça, une synthèse TTS restée "en vol" d'un tour
@@ -80,6 +93,13 @@ class OfflineVoicePlayer {
     // (improbable, mais possible), l'exception remonterait comme si le
     // fichier audio était en cause, ce qui compliquerait le diagnostic.
     if (usedFallback) {
+      if (language.isYoruba) {
+        debugPrint(
+          'Yorùbá recording is not available yet ($assetPath); keeping the '
+          'patient reply in text rather than playing English speech.',
+        );
+        return;
+      }
       await _fallbackVoice.speak(reply.text);
     }
   }

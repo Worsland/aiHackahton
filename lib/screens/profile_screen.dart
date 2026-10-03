@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../services/firebase/auth_service.dart';
 import '../services/firebase/user_profile_service.dart';
+import '../services/lang/app_language.dart';
 import '../services/offline/offline_scenarios.dart';
 import '../services/patient_scenario.dart';
 import '../services/scenario_catalog.dart';
@@ -22,7 +23,9 @@ String _displayTitle(String internalTitle) =>
     internalTitle;
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  const ProfileScreen({super.key, this.language = AppLanguage.english});
+
+  final AppLanguage language;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -59,6 +62,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _pickPhoto() async {
+    final yoruba = widget.language.isYoruba;
     final picker = ImagePicker();
     final XFile? file;
     try {
@@ -72,9 +76,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Could not open the gallery: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            yoruba ? 'A kò lè ṣí àwòrán: $e' : 'Could not open the gallery: $e',
+          ),
+        ),
+      );
       return;
     }
     if (file == null) return;
@@ -106,8 +114,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() => _dirty = false);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not save the photo. Please try again.'),
+        SnackBar(
+          content: Text(
+            widget.language.isYoruba
+                ? 'A kò lè fi àwòrán pamọ́. Jọ̀ọ́ tún gbìyànjú.'
+                : 'Could not save the photo. Please try again.',
+          ),
         ),
       );
     }
@@ -133,7 +145,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          ok ? 'Profile saved.' : 'Could not save. Please try again.',
+          widget.language.isYoruba
+              ? (ok
+                    ? 'A ti fi profaili pamọ́.'
+                    : 'A kò lè fi pamọ́. Tún gbìyànjú.')
+              : (ok ? 'Profile saved.' : 'Could not save. Please try again.'),
         ),
       ),
     );
@@ -147,11 +163,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text('My profile'),
+        title: Text(widget.language.isYoruba ? 'Profaili mi' : 'My profile'),
       ),
       body: SafeArea(
         child: _uid == null
-            ? const _NoAccount()
+            ? _NoAccount(language: widget.language)
             : StreamBuilder<UserProfile>(
                 stream: _service.watch(_uid!),
                 builder: (context, snapshot) {
@@ -185,6 +201,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildIdentityCard(BuildContext context) {
+    final yoruba = widget.language.isYoruba;
     return Column(
       children: [
         GestureDetector(
@@ -231,8 +248,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: TextField(
                 controller: _firstNameController,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(
-                  labelText: 'First name',
+                decoration: InputDecoration(
+                  labelText: yoruba ? 'Orúkọ àkọ́kọ́' : 'First name',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -242,8 +259,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: TextField(
                 controller: _lastNameController,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(
-                  labelText: 'Last name',
+                decoration: InputDecoration(
+                  labelText: yoruba ? 'Orúkọ ìdílé' : 'Last name',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -266,7 +283,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         color: Colors.white,
                       ),
                     )
-                  : const Text('Save changes'),
+                  : Text(yoruba ? 'Fi àwọn àyípadà pamọ́' : 'Save changes'),
             ),
           ),
         ),
@@ -290,14 +307,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Your scores', style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              widget.language.isYoruba ? 'Àmì rẹ' : 'Your scores',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 4),
             if (played.isEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Text(
-                  'No scenario completed yet. Your best score on each one '
-                  'will appear here.',
+                  widget.language.isYoruba
+                      ? 'O kò tíì parí àpẹẹrẹ kankan. Àmì tó dára jù fún ọkọọkan yóò hàn níbí.'
+                      : 'No scenario completed yet. Your best score on each one will appear here.',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               )
@@ -305,7 +326,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _buildScoreSummary(context, scores, played),
               const SizedBox(height: 8),
               for (final s in played)
-                _ScoreRow(scenario: s, score: scores[s.title]!),
+                _ScoreRow(
+                  scenario: s,
+                  score: scores[s.title]!,
+                  language: widget.language,
+                ),
             ],
           ],
         );
@@ -334,9 +359,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: Row(
         children: [
-          _SummaryStat(label: 'Scenarios played', value: '${played.length}'),
-          _SummaryStat(label: 'Total attempts', value: '$totalAttempts'),
-          _SummaryStat(label: 'Average best', value: '${averageBest.round()}%'),
+          _SummaryStat(
+            label: widget.language.isYoruba
+                ? 'Àwọn àpẹẹrẹ tí a ṣe'
+                : 'Scenarios played',
+            value: '${played.length}',
+          ),
+          _SummaryStat(
+            label: widget.language.isYoruba
+                ? 'Àpapọ̀ ìgbìyànjú'
+                : 'Total attempts',
+            value: '$totalAttempts',
+          ),
+          _SummaryStat(
+            label: widget.language.isYoruba
+                ? 'Àpapọ̀ àmì tó ga jù'
+                : 'Average best',
+            value: '${averageBest.round()}%',
+          ),
         ],
       ),
     );
@@ -351,12 +391,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       label: Text(
         linked
-            ? 'Manage my sign-in (${user.email})'
-            : 'Save my progress to an account',
+            ? (widget.language.isYoruba
+                  ? 'Ṣàkóso ìwọlé mi (${user.email})'
+                  : 'Manage my sign-in (${user.email})')
+            : (widget.language.isYoruba
+                  ? 'Fi ìlọsíwájú pamọ́ sínú àkọọ́lẹ̀'
+                  : 'Save my progress to an account'),
       ),
-      onPressed: () => Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (context) => const AccountScreen())),
+      onPressed: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => AccountScreen(language: widget.language),
+        ),
+      ),
     );
   }
 }
@@ -390,9 +436,14 @@ class _SummaryStat extends StatelessWidget {
 }
 
 class _ScoreRow extends StatelessWidget {
-  const _ScoreRow({required this.scenario, required this.score});
+  const _ScoreRow({
+    required this.scenario,
+    required this.score,
+    required this.language,
+  });
   final PatientScenario scenario;
   final ScenarioBestScore score;
+  final AppLanguage language;
 
   @override
   Widget build(BuildContext context) {
@@ -402,7 +453,11 @@ class _ScoreRow extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              _displayTitle(scenario.title),
+              OfflineScenarios.forTitle(
+                    scenario.title,
+                    language: language,
+                  )?.clinicalInfo.displayTitle ??
+                  _displayTitle(scenario.title),
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
@@ -416,7 +471,9 @@ class _ScoreRow extends StatelessWidget {
           ),
           const SizedBox(width: 6),
           Text(
-            '· ${score.attempts} ${score.attempts > 1 ? 'tries' : 'try'}',
+            language.isYoruba
+                ? '· Ìgbìyànjú ${score.attempts}'
+                : '· ${score.attempts} ${score.attempts > 1 ? 'tries' : 'try'}',
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
@@ -426,7 +483,8 @@ class _ScoreRow extends StatelessWidget {
 }
 
 class _NoAccount extends StatelessWidget {
-  const _NoAccount();
+  const _NoAccount({required this.language});
+  final AppLanguage language;
 
   @override
   Widget build(BuildContext context) {
@@ -434,8 +492,9 @@ class _NoAccount extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Text(
-          'No account yet. Open the app once with a connection so it can '
-          'create your session, then come back here.',
+          language.isYoruba
+              ? 'Kò tíì sí àkọọ́lẹ̀. Ṣí ohun èlò náà pẹ̀lú ìsopọ̀ lẹ́ẹ̀kan kí a lè dá ìgbà ìwọlé sílẹ̀, lẹ́yìn náà padà síbí.'
+              : 'No account yet. Open the app once with a connection so it can create your session, then come back here.',
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodyMedium,
         ),

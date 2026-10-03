@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../services/firebase/auth_service.dart';
+import '../services/lang/app_language.dart';
 import '../theme/app_theme.dart';
 import '../widgets/content_width.dart';
 
@@ -17,7 +18,12 @@ import '../widgets/content_width.dart';
 /// sans fusionner sa progression — l'utilisateur doit le savoir avant de
 /// valider, pas le découvrir après coup.
 class AccountScreen extends StatefulWidget {
-  const AccountScreen({super.key});
+  const AccountScreen({
+    super.key,
+    this.language = AppLanguage.english,
+  });
+
+  final AppLanguage language;
 
   @override
   State<AccountScreen> createState() => _AccountScreenState();
@@ -44,16 +50,26 @@ class _AccountScreenState extends State<AccountScreen> {
 
   String? _validateEmail(String? v) {
     final value = v?.trim() ?? '';
-    if (value.isEmpty) return 'Enter an email.';
+    if (value.isEmpty) {
+      return widget.language.isYoruba
+          ? 'Tẹ àdírẹ́sì ímeèlì sí i.'
+          : 'Enter an email.';
+    }
     if (!value.contains('@') || !value.contains('.')) {
-      return 'This email doesn\'t look valid.';
+      return widget.language.isYoruba
+          ? 'Àdírẹ́sì ímeèlì yìí kò dà bí èyí tó tọ́.'
+          : 'This email doesn\'t look valid.';
     }
     return null;
   }
 
   String? _validatePassword(String? v) {
     final value = v ?? '';
-    if (value.length < 6) return 'At least 6 characters.';
+    if (value.length < 6) {
+      return widget.language.isYoruba
+          ? 'Ó kéré tán, lẹ́tà mẹ́fà ni ọ̀rọ̀ aṣínà gbọ́dọ̀ ní.'
+          : 'At least 6 characters.';
+    }
     return null;
   }
 
@@ -81,9 +97,12 @@ class _AccountScreenState extends State<AccountScreen> {
         SnackBar(
           content: Text(
             _mode == _FormMode.create
-                ? 'Account created: your progress is now saved.'
-                : 'Signed in. Your progress on this device has been replaced '
-                      'by that of this account.',
+                ? (widget.language.isYoruba
+                      ? 'A ti dá àkọọ́lẹ̀ sílẹ̀; a ti fi ìlọsíwájú rẹ pamọ́.'
+                      : 'Account created: your progress is now saved.')
+                : (widget.language.isYoruba
+                      ? 'O ti wọlé. A ti rọ́pò ìlọsíwájú ẹ̀rọ yìí pẹ̀lú ti àkọọ́lẹ̀ yìí.'
+                      : 'Signed in. Your progress on this device has been replaced by that of this account.'),
           ),
         ),
       );
@@ -91,7 +110,11 @@ class _AccountScreenState extends State<AccountScreen> {
     } on FirebaseAuthException catch (e) {
       setState(() => _error = _messageFor(e));
     } catch (e) {
-      setState(() => _error = 'Something went wrong: $e');
+      setState(
+        () => _error = widget.language.isYoruba
+            ? 'Àṣìṣe kan ṣẹlẹ̀: $e'
+            : 'Something went wrong: $e',
+      );
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -100,6 +123,11 @@ class _AccountScreenState extends State<AccountScreen> {
   String _messageFor(FirebaseAuthException e) {
     switch (e.code) {
       case 'email-already-in-use':
+        if (widget.language.isYoruba) {
+          return _mode == _FormMode.create
+              ? 'Àkọọ́lẹ̀ kan ti so mọ́ ímeèlì yìí. Wọlé dípò kí o tún ṣẹ̀dá àkọọ́lẹ̀.'
+              : 'Àkọọ́lẹ̀ kan ti so mọ́ ímeèlì yìí, ṣùgbọ́n àṣìṣe míì ṣẹlẹ̀. Tún gbìyànjú.';
+        }
         return _mode == _FormMode.create
             ? 'This email already has an account. Use "I already have an '
                   'account" to sign in instead.'
@@ -107,17 +135,31 @@ class _AccountScreenState extends State<AccountScreen> {
                   'failed. Please try again.';
       case 'invalid-credential':
       case 'wrong-password':
-        return 'Incorrect password.';
+        return widget.language.isYoruba
+            ? 'Ọ̀rọ̀ aṣínà kò tọ́.'
+            : 'Incorrect password.';
       case 'user-not-found':
+        if (widget.language.isYoruba) {
+          return 'Kò sí àkọọ́lẹ̀ tó ní ímeèlì yìí. Ṣẹ̀dá àkọọ́lẹ̀ tuntun.';
+        }
         return 'No account with this email. Use "Create my account" '
             'to make one.';
       case 'weak-password':
-        return 'This password is too weak.';
+        return widget.language.isYoruba
+            ? 'Ọ̀rọ̀ aṣínà yìí rọ̀ jù.'
+            : 'This password is too weak.';
       case 'network-request-failed':
+        if (widget.language.isYoruba) {
+          return 'Kò sí ìsopọ̀; o kò lè ṣẹ̀dá àkọọ́lẹ̀ tàbí wọlé láìsí ayélujára. Tún gbìyànjú nígbà tí ìsopọ̀ bá wà.';
+        }
         return 'No connection: you can\'t create or join an account '
             'offline. Please try again once you\'re online.';
       default:
-        return e.message ?? 'Something went wrong (${e.code}).';
+        if (widget.language.isYoruba) {
+          return 'Àṣìṣe kan ṣẹlẹ̀ (${e.code}). Tún gbìyànjú.';
+        }
+        return e.message ??
+            'Something went wrong (${e.code}).';
     }
   }
 
@@ -133,6 +175,7 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget build(BuildContext context) {
     final user = AuthService.instance.currentUser;
     final linked = user != null && !user.isAnonymous;
+    final yoruba = widget.language.isYoruba;
 
     return Scaffold(
       appBar: AppBar(
@@ -140,7 +183,7 @@ class _AccountScreenState extends State<AccountScreen> {
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text('My account'),
+        title: Text(yoruba ? 'Àkọọ́lẹ̀ mi' : 'My account'),
       ),
       body: SafeArea(
         child: ContentWidth(
@@ -163,13 +206,17 @@ class _AccountScreenState extends State<AccountScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            user.email ?? '(account without email)',
+            user.email ??
+                (widget.language.isYoruba
+                    ? '(àkọọ́lẹ̀ láìsí ímeèlì)'
+                    : '(account without email)'),
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 4),
           Text(
-            'Your progress is saved to this account and available from '
-            'any device.',
+            widget.language.isYoruba
+                ? 'A ti fi ìlọsíwájú rẹ pamọ́ sínú àkọọ́lẹ̀ yìí; o lè rí i lórí ẹ̀rọ èyíkéyìí.'
+                : 'Your progress is saved to this account and available from any device.',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodySmall,
           ),
@@ -177,7 +224,7 @@ class _AccountScreenState extends State<AccountScreen> {
           OutlinedButton.icon(
             onPressed: _signOut,
             icon: const Icon(Icons.logout_rounded),
-            label: const Text('Sign out'),
+            label: Text(widget.language.isYoruba ? 'Jáde' : 'Sign out'),
           ),
         ],
       ),
@@ -196,18 +243,23 @@ class _AccountScreenState extends State<AccountScreen> {
         const SizedBox(height: 12),
         Text(
           _mode == _FormMode.create
-              ? 'Save my progress'
-              : 'Sign in to my account',
+              ? (widget.language.isYoruba
+                    ? 'Fi ìlọsíwájú pamọ́'
+                    : 'Save my progress')
+              : (widget.language.isYoruba
+                    ? 'Wọlé sí àkọọ́lẹ̀ mi'
+                    : 'Sign in to my account'),
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 6),
         Text(
           _mode == _FormMode.create
-              ? 'Keep your score and history even if you change device '
-                    'or reinstall the app.'
-              : 'Recover the progress already linked to this email — '
-                    'progress made on this device without an account will '
-                    'not be merged.',
+              ? (widget.language.isYoruba
+                    ? 'Pa àmì àti ìtàn rẹ mọ́ bí o bá yí ẹ̀rọ padà tàbí tún fi ohun èlò náà sí i.'
+                    : 'Keep your score and history even if you change device or reinstall the app.')
+              : (widget.language.isYoruba
+                    ? 'Gba ìlọsíwájú tó so mọ́ ímeèlì yìí padà. A kò ní so ìlọsíwájú ẹ̀rọ yìí pọ̀ mọ́ ọn.'
+                    : 'Recover the progress already linked to this email — progress made on this device without an account will not be merged.'),
           style: Theme.of(context).textTheme.bodySmall,
         ),
         const SizedBox(height: 24),
@@ -219,8 +271,8 @@ class _AccountScreenState extends State<AccountScreen> {
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
+                decoration: InputDecoration(
+                  labelText: widget.language.isYoruba ? 'Ímeèlì' : 'Email',
                   border: OutlineInputBorder(),
                 ),
                 validator: _validateEmail,
@@ -232,7 +284,9 @@ class _AccountScreenState extends State<AccountScreen> {
                 textInputAction: TextInputAction.done,
                 onFieldSubmitted: (_) => _submit(),
                 decoration: InputDecoration(
-                  labelText: 'Password',
+                  labelText: widget.language.isYoruba
+                      ? 'Ọ̀rọ̀ aṣínà'
+                      : 'Password',
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -270,8 +324,10 @@ class _AccountScreenState extends State<AccountScreen> {
                     )
                   : Text(
                       _mode == _FormMode.create
-                          ? 'Create my account'
-                          : 'Sign in',
+                          ? (widget.language.isYoruba
+                                ? 'Ṣẹ̀dá àkọọ́lẹ̀ mi'
+                                : 'Create my account')
+                          : (widget.language.isYoruba ? 'Wọlé' : 'Sign in'),
                     ),
             ),
           ),
@@ -288,8 +344,12 @@ class _AccountScreenState extends State<AccountScreen> {
                 }),
           child: Text(
             _mode == _FormMode.create
-                ? 'I already have an account'
-                : 'Create an account instead',
+                ? (widget.language.isYoruba
+                      ? 'Mo ti ní àkọọ́lẹ̀ tẹ́lẹ̀'
+                      : 'I already have an account')
+                : (widget.language.isYoruba
+                      ? 'Ṣẹ̀dá àkọọ́lẹ̀ dípò bẹ́ẹ̀'
+                      : 'Create an account instead'),
           ),
         ),
       ],

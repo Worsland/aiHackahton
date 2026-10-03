@@ -6,6 +6,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:permission_handler/permission_handler.dart';
 
+import 'lang/speech_locale.dart';
 import 'web_stt/web_offline_stt.dart';
 
 /// Voix native du téléphone : gratuite, fonctionne même en zone
@@ -120,22 +121,71 @@ class VoiceService {
   /// modèle embarqué plutôt que d'attendre un délai pour rien. Le modèle
   /// local est généralement moins précis, en particulier sur des noms
   /// médicaux ou une langue peu courante.
-  Future<String> listenOnce({bool onDevice = false}) async {
+  Future<String> listenOnce({
+    bool onDevice = false,
+    String localeId = 'en_US',
+  }) async {
     // Web + hors ligne : le navigateur envoie sinon l'audio à un serveur
     // (l'option `onDevice` de speech_to_text n'a pas d'effet sur le web).
     // Peut lever une OfflineSttException au message lisible.
     if (kIsWeb && onDevice) {
+      if (!localeId.toLowerCase().startsWith('en')) {
+        throw const OfflineSttException(
+          'Offline Yoruba speech recognition is not supported in this '
+          'browser yet. Use the keyboard instead.',
+        );
+      }
       return _webOffline.listenOnce();
     }
 
     if (!_sttReady) {
       _sttReady = await _initStt();
-      if (!_sttReady) return '';
+      if (!_sttReady) {
+        throw OfflineSttException(
+          localeId.toLowerCase().startsWith('yo')
+              ? 'A kò lè lo gbohungbohun tàbí ìdámọ̀ ohùn. Jọ̀ọ́ ṣàyẹ̀wò àṣẹ '
+                    'microphone kí o sì lo pátákó ìkọ̀wé.'
+              : 'Speech recognition is not available. Check microphone '
+                    'permission or use the keyboard.',
+        );
+      }
     }
 
     // Si une écoute précédente traîne encore, on l'arrête proprement.
     if (_stt.isListening) {
       await _stt.stop();
+    }
+
+    var resolvedLocaleId = localeId;
+    if (onDevice) {
+      try {
+        final locales = await _stt.locales();
+        resolvedLocaleId =
+            SpeechLocale.resolve(
+              localeId,
+              locales.map((locale) => locale.localeId),
+            ) ??
+            (throw OfflineSttException(
+              localeId.toLowerCase().startsWith('yo')
+                  ? 'Èdè Yorùbá offline kò hàn láàárín àwọn èdè tí ẹ̀rọ yìí ń '
+                        'pèsè. Lo pátákó ìkọ̀wé dípò rẹ̀.'
+                  : 'English speech is not available offline on this phone. '
+                        'Install an offline language pack or use the keyboard.',
+            ));
+      } on OfflineSttException {
+        rethrow;
+      } catch (error) {
+        debugPrint('Could not check offline speech languages: $error');
+        if (localeId.toLowerCase().startsWith('yo')) {
+          throw const OfflineSttException(
+            'A kò lè ṣàyẹ̀wò èdè ìdámọ̀ ohùn offline lórí ẹ̀rọ yìí. Lo pátákó '
+            'ìkọ̀wé dípò rẹ̀.',
+          );
+        }
+        throw OfflineSttException(
+          'Could not check offline speech languages: $error',
+        );
+      }
     }
 
     // Repart de zéro à chaque écoute : sinon une erreur ou un statut d'une
@@ -157,7 +207,7 @@ class VoiceService {
         );
         if (res.finalResult) _completeSession();
       },
-      localeId: 'en_US', // reconnaissance vocale en anglais
+      localeId: resolvedLocaleId,
       listenOptions: stt.SpeechListenOptions(
         onDevice: onDevice,
         // Le mode par défaut d'Android considère souvent qu'il n'y a "pas
@@ -199,44 +249,71 @@ class VoiceService {
     // rendre une chaîne vide muette, qui ressemblait à un micro capricieux.
     if (result.trim().isEmpty && _lastErrorCode != null) {
       throw OfflineSttException(
-        _describeError(_lastErrorCode!, onDevice: onDevice),
+        _describeError(_lastErrorCode!, onDevice: onDevice, localeId: localeId),
       );
     }
 
     return result;
   }
 
-  String _describeError(String code, {required bool onDevice}) {
+  String _describeError(
+    String code, {
+    required bool onDevice,
+    required String localeId,
+  }) {
+    final yoruba = localeId.toLowerCase().startsWith('yo');
     switch (code) {
       case 'error_no_match':
+        if (yoruba) {
+          return 'A kò gbọ́ ọ dáadáa. Tún tẹ gbohungbohun, kí o sún mọ́ ọn, '
+              'kí o sì sọ̀rọ̀ sókè díẹ̀.';
+        }
         return "Didn't catch that. Try speaking right after tapping the "
             'microphone, a bit closer and louder.';
       case 'error_speech_timeout':
+        if (yoruba) {
+          return 'A kò gbọ́ ọ̀rọ̀ kankan. Tún tẹ gbohungbohun, kí o sì bẹ̀rẹ̀ '
+              'sí í sọ̀rọ̀ lẹ́sẹ̀kẹsẹ̀.';
+        }
         return 'No speech detected. Tap the microphone again and start '
             'talking straight away.';
       case 'error_language_unavailable':
       case 'error_language_not_supported':
-        return 'The English offline speech pack is not installed on this '
-            "phone ($code). Install it in your phone's voice settings "
-            '(Google app > Settings > Voice > Offline speech recognition > '
-            'English (US)), or use the keyboard instead.';
+        if (yoruba) {
+          return 'Èdè Yorùbá offline kò sí lórí ẹ̀rọ yìí. Ṣàyẹ̀wò ètò ohùn '
+              'ẹ̀rọ náà tàbí lo pátákó ìkọ̀wé.';
+        }
+        return 'The offline speech pack for $localeId is not installed on '
+            "this phone ($code). Install it in the phone's speech settings, "
+            'or use the keyboard instead.';
       case 'error_network':
       case 'error_network_timeout':
       case 'error_server':
         if (onDevice) {
+          if (yoruba) {
+            return 'A kò lè bẹ̀rẹ̀ ìdámọ̀ ohùn Yorùbá lórí ẹ̀rọ yìí ($code). '
+                'Ṣàyẹ̀wò ètò ohùn offline tàbí lo pátákó ìkọ̀wé.';
+          }
           return 'Offline speech recognition could not start ($code). '
-              'Check that the English offline language pack is installed, '
+              'Check that the $localeId offline language pack is installed, '
               'or use the keyboard instead.';
         }
         return 'Network problem during speech recognition ($code). '
             'Switch to offline mode or use the keyboard instead.';
       default:
         if (onDevice) {
+          if (yoruba) {
+            return 'Ìdámọ̀ ohùn Yorùbá offline kò sí lórí ẹ̀rọ yìí ($code). '
+                'Lo pátákó ìkọ̀wé dípò rẹ̀.';
+          }
           return 'Offline speech recognition is not available on this '
               "phone ($code). Check that an offline language pack for "
-              "English is installed on the device (in your phone's voice "
+              "$localeId is installed on the device (in your phone's voice "
               'assistant / Google app settings, under offline speech '
               'recognition), or use the keyboard instead.';
+        }
+        if (yoruba) {
+          return 'Ìdámọ̀ ohùn kùnà ($code). Lo pátákó ìkọ̀wé dípò rẹ̀.';
         }
         return 'Speech recognition failed ($code). Use the keyboard instead.';
     }

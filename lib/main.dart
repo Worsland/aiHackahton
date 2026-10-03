@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'firebase_options.dart';
 import 'services/firebase/auth_service.dart';
 import 'services/gemini_service.dart';
+import 'services/lang/app_language_controller.dart';
 import 'services/scenario_catalog.dart';
 import 'services/scenario_score_board.dart';
 import 'screens/simulation_screen.dart';
@@ -17,6 +18,7 @@ const geminiApiKey = 'colle_ta_cle_ici';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AppLanguageController.instance.load();
 
   // Charge le cache local des scénarios déjà synchronisés (aucun réseau
   // requis) : garantit que ce qui a été téléchargé une fois reste
@@ -77,7 +79,7 @@ class HackathonApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Simulateur Vocal — Agents de Santé',
+      title: 'Ilera',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       home: geminiApiKey.isEmpty

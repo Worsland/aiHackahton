@@ -10,7 +10,52 @@ Plan de travail priorisé pour préparer la démo Hack-Nation, puis faire évolu
 - [x] Bouton Feedback retiré de l'entretien ; le diagnostic reste l'action de fin.
 - [x] Icônes Ilera générées pour Android, iOS et le web.
 - [x] Build web vérifié ; 9 tests ciblés du matcher passent.
-- [ ] Build Android après les changements récents à confirmer. Build iOS à vérifier sur macOS/Xcode.
+- [x] Build Android debug vérifié après les changements récents. Build iOS à vérifier sur macOS/Xcode.
+
+## Priorité actuelle — forme et expérience multilingue
+
+Cette tranche remplace l'ordre de priorité précédent : traiter d'abord la
+cohérence visuelle et linguistique de l'expérience, puis mesurer la qualité du
+parcours. Le contenu clinique et les sources de soumission restent à valider,
+mais ne bloquent pas le travail d'interface.
+
+- [ ] A. Localiser en Yorùbá toutes les pages accessibles lorsque la langue Yorùbá est sélectionnée.
+  - Faire porter le choix de langue au niveau de l'application et le conserver lors de la navigation et du redémarrage.
+  - Recenser et traduire les textes visibles, titres, boutons, états vides, erreurs, validations, dialogues et notifications dans les écrans scénarios, simulation, diagnostic, récapitulatif, progression, profil et compte.
+  - Vérifier qu'aucun écran de ce parcours ne revient silencieusement en anglais ; préserver English comme langue par défaut.
+  - Ajouter des tests de localisation pour les principales pages et interactions.
+  - [x] Persister le choix de langue et le transmettre aux pages Profil, Progression, Compte, Diagnostic et Récapitulatif.
+
+- [ ] B. Fournir tous les scénarios en Yorùbá.
+  - Ajouter pour chaque scénario existant son titre neutre, sa description, les points clés, les réponses du patient, les choix de diagnostic, les conseils et le récapitulatif.
+  - Afficher la langue choisie dans la liste et faire correspondre chaque scénario à ses données localisées.
+  - Garder les contenus Yorùbá clairement marqués comme brouillon tant qu'ils ne sont pas relus ; ne pas inventer de traduction clinique validée.
+  - Vérifier que chaque scénario est jouable du début au récapitulatif dans les deux langues.
+  - [x] Ajouter les trois scénarios intégrés en version Yorùbá hors ligne et les exposer dans la liste.
+  - [ ] Faire relire les textes et valider le parcours complet par une personne Yorùbá.
+
+- [ ] C. Ajouter une commande micro en mode hors ligne, en disposition adaptative mobile et grand écran.
+  - Cibles prioritaires : Android et iOS.
+  - Sélectionner la locale STT en fonction de la langue active ; transcrire en texte puis réutiliser le même flux de matching que la saisie clavier.
+  - Vérifier séparément sur les appareils cibles si le moteur et les données de langue permettent une reconnaissance réellement hors ligne en `en_US` et en Yorùbá. La simple disponibilité d'une locale ou de `onDevice` ne suffit pas comme preuve.
+  - Si la langue n'est pas disponible hors ligne, expliquer l'indisponibilité et garder la saisie texte pleinement utilisable ; ne pas envoyer l'audio à un service distant sans consentement explicite.
+  - Couvrir permissions micro, démarrage/arrêt, erreur, état d'écoute et adaptation petit/grand écran par tests.
+  - [x] Relier le micro à la chaîne de matching existante en mobile, transmettre `en_US`/`yo_NG`, sélectionner uniquement une locale exposée par le moteur et ne jamais substituer l'anglais au Yorùbá.
+  - [ ] Tester la disponibilité et la transcription réellement hors ligne sur les appareils Android et iOS ciblés.
+
+- [ ] D. Ajouter les réponses audio Yorùbá préenregistrées.
+  - Source demandée : enregistrements de locuteurs Yorùbá, pas de TTS présenté comme voix validée.
+  - Produire les enregistrements pour les réponses fixes de tous les scénarios localisés, établir une correspondance stable entre identifiants de réponse et fichiers, puis les intégrer comme assets.
+  - Gérer lecture, interruption et absence de fichier sans bloquer l'entretien ; garder un fallback clairement identifié.
+  - Confirmer que les textes parlés ont été relus par une personne Yorùbá avant l'enregistrement.
+  - [x] Préparer les chemins d'assets séparés et empêcher le fallback vers les enregistrements/voix anglais.
+  - [ ] Enregistrer et fournir les fichiers audio Yorùbá : aucun enregistrement natif n'est disponible dans le workspace.
+
+- [ ] E. Mesurer le parcours complet anglais et Yorùbá, texte et voix.
+  - Constituer des formulations écrites et des enregistrements de test, séparés par langue et scénario, avec résultats attendus relus par des locuteurs.
+  - Mesurer le STT (transcription, erreurs, latence et disponibilité réellement hors ligne) séparément du matcher (bon point clé, abstention, faux rapprochement, répétition).
+  - Comparer la saisie texte et la chaîne audio→STT→matcher ; ne pas attribuer au matcher une erreur de transcription, ni annoncer un score représentatif à partir d'un petit jeu écrit par l'équipe.
+  - Documenter appareils, versions, moteurs, packs de langue, protocole, réussites et échecs dans `docs/EVALUATION.md`.
 
 ## Nouveau plan de code après le ProjectGOAL rebasé (week-end hackathon)
 
@@ -115,12 +160,7 @@ Plan de travail priorisé pour préparer la démo Hack-Nation, puis faire évolu
 - [ ] 16. Vérifier le TTS embarqué yoruba uniquement si une personne native a validé la qualité ; sinon rester sur le préenregistré.
 - [ ] 17. Préparer la reconnaissance vocale yoruba hors ligne comme une limite de la version actuelle, sans la promettre.
 - [ ] 18. Ajouter un vrai flux de test de comparaison Gemini Live vs Claude sur les mêmes questions yoruba.
-- [ ] 19. Évaluer la faisabilité du STT hors ligne sur téléphone, en anglais et en yoruba.
-  - Inventorier les moteurs STT disponibles sur les appareils cibles et leurs langues installées.
-  - Vérifier si chaque moteur prend en charge une reconnaissance réellement sur l'appareil (`onDevice`) pour `en_US` et Yorùbá ; ne pas déduire le support de la seule présence d'une locale.
-  - Tester des enregistrements de locuteurs, comparer les transcriptions attendues, et consigner appareil, moteur, langue et latence.
-  - Garder la saisie texte comme solution de repli si la langue ou le mode hors ligne ne sont pas pris en charge.
-  - Ne promettre la fonctionnalité qu'après tests sur les appareils ciblés et relecture des transcriptions Yorùbá.
+- [ ] 19. Évaluer la faisabilité du STT hors ligne sur téléphone, en anglais et en yoruba — absorbé dans la priorité C ci-dessus.
 
 ### Ordre de mise en œuvre recommandé
 

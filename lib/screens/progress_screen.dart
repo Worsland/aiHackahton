@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../services/firebase/auth_service.dart';
 import '../services/firebase/session_repository.dart';
+import '../services/lang/app_language.dart';
 import '../services/offline/offline_scenarios.dart';
 import '../theme/app_theme.dart';
 import '../widgets/content_width.dart';
@@ -9,8 +10,23 @@ import 'account_screen.dart';
 
 /// Petit formatage de date sans dépendance externe (pas besoin du package
 /// `intl` juste pour ça) : "Oct 3, 14:05".
-String _formatDate(DateTime d) {
-  const months = [
+String _formatDate(DateTime d, AppLanguage language) {
+  final months = language.isYoruba
+      ? const [
+          'Sẹ́rẹ́',
+          'Èrèlé',
+          'Ẹrẹ̀nà',
+          'Ìgbé',
+          'Ẹ̀bibi',
+          'Òkúdù',
+          'Agẹmọ',
+          'Ògún',
+          'Owewe',
+          'Ọ̀wàrà',
+          'Bélú',
+          'Ọ̀pẹ̀',
+        ]
+      : const [
     'Jan',
     'Feb',
     'Mar',
@@ -23,7 +39,7 @@ String _formatDate(DateTime d) {
     'Oct',
     'Nov',
     'Dec',
-  ];
+        ];
   final hh = d.hour.toString().padLeft(2, '0');
   final mm = d.minute.toString().padLeft(2, '0');
   return '${months[d.month - 1]} ${d.day}, $hh:$mm';
@@ -35,9 +51,10 @@ String _formatDate(DateTime d) {
 /// Firestore dédiée, la limite de 50 sessions suffit largement pour un
 /// usage d'entraînement individuel.
 class ProgressScreen extends StatefulWidget {
-  const ProgressScreen({super.key, this.sessionRepository});
+  const ProgressScreen({super.key, this.sessionRepository, this.language = AppLanguage.english});
 
   final SessionRepository? sessionRepository;
+  final AppLanguage language;
 
   @override
   State<ProgressScreen> createState() => _ProgressScreenState();
@@ -50,22 +67,27 @@ class _ProgressScreenState extends State<ProgressScreen> {
   Future<void> _openAccount() async {
     await Navigator.of(
       context,
-    ).push(MaterialPageRoute(builder: (context) => const AccountScreen()));
+    ).push(
+      MaterialPageRoute(
+        builder: (context) => AccountScreen(language: widget.language),
+      ),
+    );
     if (mounted) setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     final uid = AuthService.instance.currentUser?.uid;
+    final yoruba = widget.language.isYoruba;
 
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          tooltip: 'Back to scenarios',
+          tooltip: yoruba ? 'Padà sí àwọn àpẹẹrẹ' : 'Back to scenarios',
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text('My progress'),
+        title: Text(yoruba ? 'Ìlọsíwájú mi' : 'My progress'),
         actions: [
           IconButton(
             icon: Icon(
@@ -74,8 +96,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   : Icons.person_rounded,
             ),
             tooltip: AuthService.instance.isAnonymous
-                ? 'Save my progress'
-                : 'My account',
+                ? (yoruba ? 'Fi ìlọsíwájú mi pamọ́' : 'Save my progress')
+                : (yoruba ? 'Àkọọ́lẹ̀ mi' : 'My account'),
             onPressed: _openAccount,
           ),
         ],
@@ -84,35 +106,42 @@ class _ProgressScreenState extends State<ProgressScreen> {
         child: ContentWidth(
           maxWidth: 720,
           child: uid == null
-              ? const _NoAccount()
+              ? _NoAccount(language: widget.language)
               : StreamBuilder<List<SessionRecord>>(
                   stream: (widget.sessionRepository ?? SessionRepository())
                       .watchHistory(uid),
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
-                      return const _LoadError();
+                      return _LoadError(language: widget.language);
                     }
                     if (!snapshot.hasData) {
                       return const Center(child: CircularProgressIndicator());
                     }
                     final sessions = snapshot.data!;
                     if (sessions.isEmpty) {
-                      return const _EmptyHistory();
+                      return _EmptyHistory(language: widget.language);
                     }
                     return ListView(
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
                       children: [
                         if (AuthService.instance.isAnonymous)
-                          _SaveProgressBanner(onTap: _openAccount),
-                        _StatsHeader(sessions: sessions),
+                          _SaveProgressBanner(
+                            onTap: _openAccount,
+                            language: widget.language,
+                          ),
+                        _StatsHeader(
+                          sessions: sessions,
+                          language: widget.language,
+                        ),
                         const SizedBox(height: 24),
                         Text(
-                          'History',
+                          yoruba ? 'Ìtàn ìdánilẹ́kọ̀ọ́' : 'History',
                           style: Theme.of(context).textTheme.titleSmall
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
-                        for (final s in sessions) _SessionTile(session: s),
+                        for (final s in sessions)
+                          _SessionTile(session: s, language: widget.language),
                       ],
                     );
                   },
@@ -124,8 +153,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
 }
 
 class _SaveProgressBanner extends StatelessWidget {
-  const _SaveProgressBanner({required this.onTap});
+  const _SaveProgressBanner({required this.onTap, required this.language});
   final VoidCallback onTap;
+  final AppLanguage language;
 
   @override
   Widget build(BuildContext context) {
@@ -148,8 +178,9 @@ class _SaveProgressBanner extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Create an account to keep this progress on another '
-                    'device.',
+                    language.isYoruba
+                        ? 'Ṣẹ̀dá àkọọ́lẹ̀ kí ìlọsíwájú yìí lè wà lórí ẹ̀rọ míì.'
+                        : 'Create an account to keep this progress on another device.',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),
@@ -167,8 +198,9 @@ class _SaveProgressBanner extends StatelessWidget {
 }
 
 class _StatsHeader extends StatelessWidget {
-  const _StatsHeader({required this.sessions});
+  const _StatsHeader({required this.sessions, required this.language});
   final List<SessionRecord> sessions;
+  final AppLanguage language;
 
   @override
   Widget build(BuildContext context) {
@@ -182,7 +214,7 @@ class _StatsHeader extends StatelessWidget {
       children: [
         Expanded(
           child: _StatCard(
-            label: 'Average score',
+            label: language.isYoruba ? 'Àpapọ̀ àmì' : 'Average score',
             value: '${avg.round()}%',
             color: AppColors.primary,
           ),
@@ -190,7 +222,7 @@ class _StatsHeader extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: _StatCard(
-            label: 'Correct diagnoses',
+            label: language.isYoruba ? 'Àyẹ̀wò tó tọ́' : 'Correct diagnoses',
             value: '${(diagnosisRate * 100).round()}%',
             color: AppColors.success,
           ),
@@ -198,7 +230,7 @@ class _StatsHeader extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: _StatCard(
-            label: 'Sessions',
+            label: language.isYoruba ? 'Ìdánilẹ́kọ̀ọ́' : 'Sessions',
             value: '${sessions.length}',
             color: AppColors.secondary,
           ),
@@ -249,14 +281,9 @@ class _StatCard extends StatelessWidget {
 }
 
 class _SessionTile extends StatelessWidget {
-  const _SessionTile({required this.session});
+  const _SessionTile({required this.session, required this.language});
   final SessionRecord session;
-
-  static const _modeLabels = {
-    'live': 'Natural voice',
-    'light': 'Light',
-    'offline': 'Offline',
-  };
+  final AppLanguage language;
 
   @override
   Widget build(BuildContext context) {
@@ -287,13 +314,26 @@ class _SessionTile extends StatelessWidget {
         title: Text(
           OfflineScenarios.forTitle(
                 session.scenarioTitle,
+                language: language,
               )?.clinicalInfo.displayTitle ??
               session.scenarioTitle,
         ),
         subtitle: Text(
           [
-            _modeLabels[session.mode] ?? session.mode,
-            if (date != null) _formatDate(date),
+            language.isYoruba
+                ? switch (session.mode) {
+                    'live' => 'Ohùn lórí ayélujára',
+                    'light' => 'Rọrùn',
+                    'offline' => 'Láìsí ayélujára',
+                    _ => session.mode,
+                  }
+                : switch (session.mode) {
+                    'live' => 'Natural voice',
+                    'light' => 'Light',
+                    'offline' => 'Offline',
+                    _ => session.mode,
+                  },
+            if (date != null) _formatDate(date, language),
           ].join(' · '),
         ),
         trailing: Icon(
@@ -310,7 +350,8 @@ class _SessionTile extends StatelessWidget {
 }
 
 class _EmptyHistory extends StatelessWidget {
-  const _EmptyHistory();
+  const _EmptyHistory({required this.language});
+  final AppLanguage language;
 
   @override
   Widget build(BuildContext context) {
@@ -327,8 +368,9 @@ class _EmptyHistory extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'No completed session yet.\nRun an interview through to the '
-              'diagnosis to see your progress here.',
+              language.isYoruba
+                  ? 'O kò tíì parí ìdánilẹ́kọ̀ọ́ kankan.\nParí ìfọ̀rọ̀wánilẹ́nuwò kan kí o lè rí ìlọsíwájú rẹ.'
+                  : 'No completed session yet.\nRun an interview through to the diagnosis to see your progress here.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
@@ -340,7 +382,8 @@ class _EmptyHistory extends StatelessWidget {
 }
 
 class _NoAccount extends StatelessWidget {
-  const _NoAccount();
+  const _NoAccount({required this.language});
+  final AppLanguage language;
 
   @override
   Widget build(BuildContext context) {
@@ -357,9 +400,9 @@ class _NoAccount extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Connection unavailable for now: your progress can\'t be '
-              'loaded. It is still saved as soon as a session ends, and '
-              'will appear here once you\'re back online.',
+              language.isYoruba
+                  ? 'Kò sí ìsopọ̀ báyìí, a kò lè ṣí ìlọsíwájú rẹ. A ó fi ìlọsíwájú pamọ́ nígbà tí ìdánilẹ́kọ̀ọ́ bá parí; yóò hàn nígbà tí ìsopọ̀ bá padà.'
+                  : 'Connection unavailable for now: your progress can\'t be loaded. It is still saved as soon as a session ends, and will appear here once you\'re back online.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
@@ -371,7 +414,8 @@ class _NoAccount extends StatelessWidget {
 }
 
 class _LoadError extends StatelessWidget {
-  const _LoadError();
+  const _LoadError({required this.language});
+  final AppLanguage language;
 
   @override
   Widget build(BuildContext context) {
@@ -379,7 +423,9 @@ class _LoadError extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Text(
-          'Unable to load your progress right now.',
+          language.isYoruba
+              ? 'A kò lè ṣí ìlọsíwájú rẹ báyìí.'
+              : 'Unable to load your progress right now.',
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodyMedium,
         ),
