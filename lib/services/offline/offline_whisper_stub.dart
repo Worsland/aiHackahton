@@ -5,6 +5,7 @@ class OfflineWhisperStt implements OfflineWhisper {
   Future<String> listenOnce({
     required String languageCode,
     void Function(OfflineWhisperStatus status)? onStatus,
+    void Function(double? progress)? onDownloadProgress,
   }) {
     throw UnsupportedError(
       'On-device Whisper speech recognition is not available on this platform.',

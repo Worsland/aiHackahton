@@ -24,6 +24,7 @@ class OfflineWhisperStt implements OfflineWhisper {
   Future<String> listenOnce({
     required String languageCode,
     void Function(OfflineWhisperStatus status)? onStatus,
+    void Function(double? progress)? onDownloadProgress,
   }) async {
     if (_disposed) {
       throw StateError('Offline Whisper speech recognition is disposed.');
@@ -37,7 +38,7 @@ class OfflineWhisperStt implements OfflineWhisper {
     final modelPath = await _whisper.getPath(_model);
     if (!await File(modelPath).exists()) {
       onStatus?.call(OfflineWhisperStatus.downloadingModel);
-      await _whisper.downloadModel(_model);
+      await _downloadModel(modelPath, onProgress: onDownloadProgress);
       if (!await File(modelPath).exists()) {
         throw const OfflineSttException(
           'The offline speech model could not be downloaded.',
@@ -87,6 +88,67 @@ class OfflineWhisperStt implements OfflineWhisper {
       if (await audioFile.exists()) {
         await audioFile.delete();
       }
+    }
+  }
+
+  Future<void> _downloadModel(
+    String modelPath, {
+    void Function(double? progress)? onProgress,
+  }) async {
+    final modelFile = File(modelPath);
+    if (await modelFile.exists()) return;
+
+    final temporaryFile = File('$modelPath.part');
+    final client = HttpClient();
+    IOSink? sink;
+    try {
+      if (await temporaryFile.exists()) {
+        await temporaryFile.delete();
+      }
+
+      final request = await client.getUrl(_model.modelUri);
+      final response = await request.close();
+      if (response.statusCode != HttpStatus.ok) {
+        throw OfflineSttException(
+          'Could not download the offline speech model '
+          '(HTTP ${response.statusCode}).',
+        );
+      }
+
+      final expectedBytes = response.contentLength;
+      var receivedBytes = 0;
+      onProgress?.call(expectedBytes > 0 ? 0 : null);
+      sink = temporaryFile.openWrite();
+      await for (final chunk in response) {
+        sink.add(chunk);
+        receivedBytes += chunk.length;
+        onProgress?.call(
+          expectedBytes > 0 ? receivedBytes / expectedBytes : null,
+        );
+      }
+      await sink.flush();
+      await sink.close();
+      sink = null;
+
+      if (receivedBytes == 0 ||
+          (expectedBytes > 0 && receivedBytes != expectedBytes)) {
+        throw const OfflineSttException(
+          'The offline speech model download was incomplete. Please try again.',
+        );
+      }
+
+      await temporaryFile.rename(modelPath);
+      onProgress?.call(1);
+    } catch (_) {
+      if (sink != null) {
+        await sink.close();
+      }
+      if (await temporaryFile.exists()) {
+        await temporaryFile.delete();
+      }
+      rethrow;
+    } finally {
+      client.close(force: true);
     }
   }
 

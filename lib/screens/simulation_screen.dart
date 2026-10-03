@@ -124,6 +124,8 @@ class _SimulationScreenState extends State<SimulationScreen> {
   bool _isListening = false;
   bool _isBusy = false;
   bool _isSpeaking = false;
+  bool _offlineSttDownloading = false;
+  double? _offlineSttDownloadProgress;
 
   /// Champ de saisie manuelle, toujours visible dans les modes autres que
   /// Live (remplace l'ancien `showDialog`, puis le bouton à bascule) : voir
@@ -391,14 +393,16 @@ class _SimulationScreenState extends State<SimulationScreen> {
         onDevice: _mode == ConversationMode.offline,
         localeId: _language.speechLocaleId,
         onOfflineStatus: (status) {
-          if (!mounted || status != OfflineWhisperStatus.downloadingModel) {
-            return;
-          }
-          _showSnack(
-            _language.isYoruba
-                ? 'A ń gba àwòṣe ìdámọ̀ ohùn offline kalẹ̀. Èyí gba ìsopọ̀ intanẹẹti lẹ́ẹ̀kan ṣoṣo.'
-                : 'Downloading the offline speech model. An internet connection is needed once.',
-          );
+          if (!mounted) return;
+          setState(() {
+            _offlineSttDownloading =
+                status == OfflineWhisperStatus.downloadingModel;
+            if (!_offlineSttDownloading) _offlineSttDownloadProgress = null;
+          });
+        },
+        onOfflineDownloadProgress: (progress) {
+          if (!mounted) return;
+          setState(() => _offlineSttDownloadProgress = progress);
         },
       );
     } on OfflineSttException catch (e) {
@@ -411,7 +415,13 @@ class _SimulationScreenState extends State<SimulationScreen> {
             : 'Speech recognition failed. Please use the keyboard.',
       );
     } finally {
-      if (mounted) setState(() => _isListening = false);
+      if (mounted) {
+        setState(() {
+          _isListening = false;
+          _offlineSttDownloading = false;
+          _offlineSttDownloadProgress = null;
+        });
+      }
     }
     if (!mounted) return;
     await _handleAgentUtterance(heard);
@@ -1561,6 +1571,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
   /// Microphone de dictée locale sur mobile, distinct de l'appel Live.
   Widget _buildOfflineMicrophoneControl() {
     final available = !kIsWeb;
+    final downloadProgress = _offlineSttDownloadProgress;
     return Column(
       children: [
         _BigCircleButton(
@@ -1579,6 +1590,24 @@ class _SimulationScreenState extends State<SimulationScreen> {
                     : 'Type or speak · on-device'),
           textAlign: TextAlign.center,
         ),
+        if (_offlineSttDownloading) ...[
+          const SizedBox(height: 8),
+          SizedBox(
+            width: 240,
+            child: LinearProgressIndicator(value: _offlineSttDownloadProgress),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            downloadProgress != null
+                ? (_language.isYoruba
+                      ? 'Ó ń gba àwòṣe kalẹ̀ ${(downloadProgress * 100).round()}%'
+                      : 'Downloading speech model ${(downloadProgress * 100).round()}%')
+                : (_language.isYoruba
+                      ? 'Ó ń gba àwòṣe ìdámọ̀ ohùn offline kalẹ̀…'
+                      : 'Downloading offline speech model…'),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ],
     );
   }

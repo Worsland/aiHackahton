@@ -131,6 +131,7 @@ class VoiceService {
     bool onDevice = false,
     String localeId = 'en_US',
     void Function(OfflineWhisperStatus status)? onOfflineStatus,
+    void Function(double? progress)? onOfflineDownloadProgress,
   }) async {
     // Web + hors ligne : le navigateur envoie sinon l'audio à un serveur
     // (l'option `onDevice` de speech_to_text n'a pas d'effet sur le web).
@@ -148,6 +149,7 @@ class VoiceService {
       return _offlineWhisper.listenOnce(
         languageCode: localeId.toLowerCase().startsWith('yo') ? 'yo' : 'en',
         onStatus: onOfflineStatus,
+        onDownloadProgress: onOfflineDownloadProgress,
       );
     }
 
