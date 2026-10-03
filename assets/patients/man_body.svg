@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><defs><linearGradient id="skinV" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E9B78E" /><stop offset="1" stop-color="#DA9F75" />
+    </linearGradient>
+    <linearGradient id="shirt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#178A80" /><stop offset="1" stop-color="#0D6B63" />
+    </linearGradient>
+    <clipPath id="clipNeck">
+      <path d="M452,570 V670 H572 V570 Z" />
+    </clipPath>
+  </defs><g id="patient-body">
+    <g id="neck">
+      <path d="M452,570 V670 H572 V570 Z" fill="url(#skinV)" />
+      <ellipse cx="512" cy="632" rx="130" ry="40" fill="#C98A62" opacity="0.35" clip-path="url(#clipNeck)" />
+    </g>
+    <g id="torso">
+      <path d="M130,900 V846 C130,768 200,728 296,704 L414,684 H610 L728,704 C824,728 894,768 894,846 V900 Z" fill="url(#shirt)" />
+      <path d="M306,712 C278,770 262,830 260,900" fill="none" stroke="#0A5751" stroke-width="5" stroke-linecap="round" opacity="0.3" />
+      <path d="M718,712 C746,770 762,830 764,900" fill="none" stroke="#0A5751" stroke-width="5" stroke-linecap="round" opacity="0.3" />
+      <g id="zip-collar">
+        <path d="M410,698 L420,654 Q426,632 452,632 H572 Q598,632 604,654 L614,698 Z" fill="#15807A" />
+        <path d="M442,643 H582" fill="none" stroke="#2FA598" stroke-width="6" stroke-linecap="round" opacity="0.7" />
+        <path d="M410,698 H614" fill="none" stroke="#0A5751" stroke-width="5" stroke-linecap="round" opacity="0.4" />
+        <path d="M512,640 V796" fill="none" stroke="#0A5751" stroke-width="8" stroke-linecap="round" />
+        <path d="M512,646 V792" fill="none" stroke="#9FCFC8" stroke-width="3" stroke-dasharray="4 5" />
+        <rect x="504" y="646" width="16" height="34" rx="6" fill="#C9D8D5" stroke="#0A5751" stroke-width="3" />
+      </g>
+    </g>
+  </g>
+  
+  </svg>

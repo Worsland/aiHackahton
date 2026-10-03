@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><defs><linearGradient id="hair" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#312A3A" /><stop offset="1" stop-color="#1F1A26" />
+    </linearGradient>
+    </defs><g id="hair">
+      <path d="M470,238 C540,236 618,280 650,340 C656,362 660,396 662,430 C664,500 644,560 632,620 C626,680 616,700 614,724 C614,748 630,766 658,766 C688,766 706,750 706,712 C704,640 702,520 698,400 C696,262 624,178 512,178 C400,178 328,262 326,400 C322,520 320,640 318,712 C318,750 336,766 366,766 C394,766 410,748 410,724 C410,700 400,670 392,620 C380,560 360,500 362,430 C364,396 368,362 376,340 C388,290 420,250 470,238 Z" fill="url(#hair)" />
+      <path d="M392,232 C450,198 574,198 632,232" fill="none" stroke="#4A4056" stroke-width="10" stroke-linecap="round" opacity="0.6" />
+      <path d="M500,214 C560,218 612,248 640,296" fill="none" stroke="#4A4056" stroke-width="6" stroke-linecap="round" opacity="0.4" />
+      <path d="M346,470 C342,550 346,630 350,706" fill="none" stroke="#4A4056" stroke-width="8" stroke-linecap="round" opacity="0.35" />
+      <path d="M678,470 C682,550 678,630 674,706" fill="none" stroke="#4A4056" stroke-width="8" stroke-linecap="round" opacity="0.35" />
+    </g>
+  </svg>

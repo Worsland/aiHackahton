@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><defs><radialGradient id="face" cx="0.5" cy="0.42" r="0.65">
+      <stop offset="0" stop-color="#EBBC94" /><stop offset="1" stop-color="#DBA37A" />
+    </radialGradient>
+    <clipPath id="clipHead">
+      <path d="M512,198 C624,198 692,272 692,388 C692,470 664,560 620,596 C596,614 556,620 512,620 C468,620 428,614 404,596 C360,560 332,470 332,388 C332,272 400,198 512,198 Z" />
+    </clipPath>
+    </defs><g id="ears">
+      <circle id="ear-left" cx="332" cy="414" r="31" fill="#E2AA82" stroke="#C98F68" stroke-width="4" />
+      <ellipse cx="335" cy="416" rx="12" ry="18" fill="#D39A72" />
+      <circle id="ear-right" cx="692" cy="414" r="31" fill="#E2AA82" stroke="#C98F68" stroke-width="4" />
+      <ellipse cx="689" cy="416" rx="12" ry="18" fill="#D39A72" />
+    </g>
+
+    <path id="face" d="M512,198 C624,198 692,272 692,388 C692,470 664,560 620,596 C596,614 556,620 512,620 C468,620 428,614 404,596 C360,560 332,470 332,388 C332,272 400,198 512,198 Z" fill="url(#face)" stroke="#C98F68" stroke-width="4" />
+
+    <g clip-path="url(#clipHead)">
+      <path transform="translate(0,14)" d="M330,410 C312,290 372,172 512,170 C652,172 712,290 694,410 C690,380 684,352 666,326 C658,312 654,300 650,292 C612,300 566,286 512,278 C458,286 412,300 374,292 C370,300 366,312 358,326 C340,352 334,380 330,410 Z" fill="#C98A62" opacity="0.2" />
+    </g>
+
+    <g id="cheeks" fill="#F59E0B" opacity="0.12">
+      <ellipse cx="410" cy="490" rx="32" ry="18" />
+      <ellipse cx="614" cy="490" rx="32" ry="18" />
+    </g>
+
+    <g id="face-lines" fill="none" stroke="#C98A62" stroke-width="4" stroke-linecap="round" opacity="0.2">
+      <path d="M418,438 Q440,448 462,438" />
+      <path d="M562,438 Q584,448 606,438" />
+      <path d="M470,508 C460,524 458,538 460,548" />
+      <path d="M554,508 C564,524 566,538 564,548" />
+    </g>
+
+    <g id="nose">
+      <ellipse cx="512" cy="468" rx="9" ry="14" fill="#FFFFFF" opacity="0.12" />
+      <path d="M494,492 C502,504 522,504 530,492" fill="none" stroke="#C98A62" stroke-width="5" stroke-linecap="round" />
+    </g>
+
+    </svg>

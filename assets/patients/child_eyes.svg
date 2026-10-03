@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><g id="eyes">
+      <g id="eye-left">
+        <ellipse cx="440" cy="418" rx="29" ry="25" fill="#FFFFFF" />
+        <circle cx="440" cy="421" r="17" fill="#4A3329" />
+        <circle cx="440" cy="421" r="8.5" fill="#1A1418" />
+        <circle cx="446" cy="414" r="5" fill="#FFFFFF" />
+        <path d="M410,414 Q440,386 470,414" fill="none" stroke="#2A2431" stroke-width="6" stroke-linecap="round" />
+      </g>
+      <g id="eye-right">
+        <ellipse cx="584" cy="418" rx="29" ry="25" fill="#FFFFFF" />
+        <circle cx="584" cy="421" r="17" fill="#4A3329" />
+        <circle cx="584" cy="421" r="8.5" fill="#1A1418" />
+        <circle cx="590" cy="414" r="5" fill="#FFFFFF" />
+        <path d="M554,414 Q584,386 614,414" fill="none" stroke="#2A2431" stroke-width="6" stroke-linecap="round" />
+      </g>
+    </g>
+
+    </svg>

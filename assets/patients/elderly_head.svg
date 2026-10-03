@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><defs><radialGradient id="face" cx="0.5" cy="0.42" r="0.65">
+      <stop offset="0" stop-color="#EDC8A8" /><stop offset="1" stop-color="#DDAB85" />
+    </radialGradient>
+    <clipPath id="clipHead">
+      <path d="M512,200 C618,200 686,276 686,392 C686,474 660,556 624,596 C598,616 556,624 512,624 C468,624 426,616 400,596 C364,556 338,474 338,392 C338,276 406,200 512,200 Z" />
+    </clipPath>
+    </defs><g id="ears">
+      <circle id="ear-left" cx="340" cy="426" r="36" fill="#E1B08A" stroke="#C98F68" stroke-width="4" />
+      <ellipse cx="343" cy="428" rx="14" ry="22" fill="#D29C76" />
+      <circle id="ear-right" cx="684" cy="426" r="36" fill="#E1B08A" stroke="#C98F68" stroke-width="4" />
+      <ellipse cx="681" cy="428" rx="14" ry="22" fill="#D29C76" />
+    </g>
+
+    <path id="face" d="M512,200 C618,200 686,276 686,392 C686,474 660,556 624,596 C598,616 556,624 512,624 C468,624 426,616 400,596 C364,556 338,474 338,392 C338,276 406,200 512,200 Z" fill="url(#face)" stroke="#C98F68" stroke-width="4" />
+
+    <g clip-path="url(#clipHead)">
+      <path transform="translate(0,14)" d="M330,420 C314,320 372,182 512,180 C652,182 710,320 694,420 C690,394 682,372 668,352 C660,330 650,308 640,292 C612,284 560,268 512,266 C464,268 412,284 384,292 C374,308 364,330 356,352 C342,372 334,394 330,420 Z" fill="#C98A62" opacity="0.2" />
+    </g>
+
+    <g id="cheeks" fill="#F59E0B" opacity="0.12">
+      <ellipse cx="410" cy="496" rx="32" ry="19" />
+      <ellipse cx="614" cy="496" rx="32" ry="19" />
+    </g>
+
+    
+    <g id="wrinkles" fill="none" stroke="#B87A57" stroke-width="4" stroke-linecap="round" opacity="0.3">
+      <path d="M420,308 Q512,296 604,308" />
+      <path d="M432,330 Q512,320 592,330" />
+      <path d="M500,358 V372" />
+      <path d="M524,358 V372" />
+      <path d="M405,398 L389,390" />
+      <path d="M403,410 L385,410" />
+      <path d="M405,422 L389,430" />
+      <path d="M619,398 L635,390" />
+      <path d="M621,410 L639,410" />
+      <path d="M619,422 L635,430" />
+      <path d="M416,436 Q440,448 464,436" />
+      <path d="M560,436 Q584,448 608,436" />
+      <path d="M422,446 Q440,454 458,446" opacity="0.6" />
+      <path d="M566,446 Q584,454 602,446" opacity="0.6" />
+      <path d="M468,502 C448,522 444,550 454,574" />
+      <path d="M556,502 C576,522 580,550 570,574" />
+      <path d="M408,556 C416,586 436,604 462,614" opacity="0.6" />
+      <path d="M616,556 C608,586 588,604 562,614" opacity="0.6" />
+    </g>
+
+    <g id="nose">
+      <ellipse cx="512" cy="472" rx="9" ry="15" fill="#FFFFFF" opacity="0.12" />
+      <path d="M492,496 C500,510 524,510 532,496" fill="none" stroke="#C98A62" stroke-width="5" stroke-linecap="round" />
+    </g>
+
+    </svg>

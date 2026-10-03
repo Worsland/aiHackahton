@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><defs><linearGradient id="skinV" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#EDC09A" /><stop offset="1" stop-color="#E0A67C" />
+    </linearGradient>
+    <linearGradient id="top" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E4A54B" /><stop offset="1" stop-color="#CB8828" />
+    </linearGradient>
+    </defs><g id="patient-body">
+    <g id="neck">
+      <path d="M456,574 V690 H568 V574 Z" fill="url(#skinV)" />
+    </g>
+    <g id="torso">
+      <path d="M150,900 V840 C150,764 214,724 304,702 L418,678 H606 L720,702 C810,724 874,764 874,840 V900 Z" fill="url(#top)" />
+      <path d="M318,708 C292,770 280,830 278,900" fill="none" stroke="#A5661C" stroke-width="5" stroke-linecap="round" opacity="0.3" />
+      <path d="M706,708 C732,770 744,830 746,900" fill="none" stroke="#A5661C" stroke-width="5" stroke-linecap="round" opacity="0.3" />
+      <g id="turtleneck">
+        <path d="M418,686 L428,632 Q430,608 456,608 H568 Q594,608 596,632 L606,686 Z" fill="#E2A249" />
+        <path d="M442,619 H582" fill="none" stroke="#F0BE6E" stroke-width="6" stroke-linecap="round" opacity="0.7" />
+        <path d="M430,640 Q512,654 594,640" fill="none" stroke="#A5661C" stroke-width="5" stroke-linecap="round" opacity="0.3" />
+        <path d="M424,663 Q512,677 600,663" fill="none" stroke="#A5661C" stroke-width="5" stroke-linecap="round" opacity="0.3" />
+        <path d="M418,686 H606" fill="none" stroke="#A5661C" stroke-width="5" stroke-linecap="round" opacity="0.35" />
+      </g>
+    </g>
+  </g>
+  
+  </svg>

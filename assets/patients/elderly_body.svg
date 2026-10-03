@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><defs><linearGradient id="skinV" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E9C2A0" /><stop offset="1" stop-color="#DCAA84" />
+    </linearGradient>
+    <linearGradient id="cardigan" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#CB9E64" /><stop offset="1" stop-color="#AB7D42" />
+    </linearGradient>
+    <linearGradient id="tee" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F4EEE2" /><stop offset="1" stop-color="#E4DAC6" />
+    </linearGradient>
+    <clipPath id="clipNeck">
+      <path d="M454,574 V652 C454,672 432,680 392,680 L392,780 H632 V680 C592,680 570,672 570,652 V574 Z" />
+    </clipPath>
+  </defs><g id="patient-body">
+    <g id="neck">
+      <path d="M454,574 V652 C454,672 432,680 392,680 L392,780 H632 V680 C592,680 570,672 570,652 V574 Z" fill="url(#skinV)" />
+      <ellipse cx="512" cy="636" rx="122" ry="44" fill="#C98A62" opacity="0.35" clip-path="url(#clipNeck)" />
+      <g fill="none" stroke="#B87A57" stroke-width="4" stroke-linecap="round" opacity="0.22">
+        <path d="M466,662 Q512,676 558,662" />
+        <path d="M474,680 Q512,692 550,680" />
+      </g>
+    </g>
+    <path id="undershirt" d="M392,684 C430,736 594,736 632,684 V800 H392 Z" fill="url(#tee)" />
+    <path id="undershirt-collar" d="M400,688 C436,736 588,736 624,688" fill="none" stroke="#CDBFA6" stroke-width="10" stroke-linecap="round" />
+    <g id="torso">
+      <path d="M150,900 V840 C150,764 214,724 304,702 L392,678 L512,790 L632,678 L720,702 C810,724 874,764 874,840 V900 Z" fill="url(#cardigan)" />
+      <path d="M318,708 C292,770 280,830 278,900" fill="none" stroke="#8A5F2C" stroke-width="5" stroke-linecap="round" opacity="0.3" />
+      <path d="M706,708 C732,770 744,830 746,900" fill="none" stroke="#8A5F2C" stroke-width="5" stroke-linecap="round" opacity="0.3" />
+      <path id="collar" d="M392,678 L512,790 L632,678" fill="none" stroke="#8A5F2C" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" />
+      <g id="placket">
+        <path d="M512,796 V900" fill="none" stroke="#8A5F2C" stroke-width="5" stroke-linecap="round" opacity="0.5" />
+        <circle cx="512" cy="830" r="6" fill="#8A5F2C" opacity="0.8" />
+        <circle cx="512" cy="866" r="6" fill="#8A5F2C" opacity="0.8" />
+      </g>
+    </g>
+  </g>
+
+  
+  </svg>

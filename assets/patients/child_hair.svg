@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><defs><linearGradient id="hair" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#312A3A" /><stop offset="1" stop-color="#1F1A26" />
+    </linearGradient>
+    </defs><g id="hair">
+      <path d="M330,402 C308,290 372,164 512,162 C652,164 716,290 694,402 C684,356 668,318 646,292 C608,306 550,290 510,262 C482,296 422,312 376,300 C350,332 340,368 330,402 Z" fill="url(#hair)" />
+      <path d="M396,218 C450,186 566,182 628,218" fill="none" stroke="#4A4056" stroke-width="10" stroke-linecap="round" opacity="0.6" />
+      <path d="M510,262 C524,236 560,216 602,212" fill="none" stroke="#3F3648" stroke-width="5" stroke-linecap="round" opacity="0.5" />
+    </g>
+  </svg>

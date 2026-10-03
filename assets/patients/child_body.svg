@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><defs><linearGradient id="skinV" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#EFC49E" /><stop offset="1" stop-color="#E3AB82" />
+    </linearGradient>
+    <linearGradient id="shirt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3AA89D" /><stop offset="1" stop-color="#2B8E85" />
+    </linearGradient>
+    <clipPath id="clipNeck">
+      <path d="M452,560 V650 C452,670 432,680 392,680 L392,770 H632 V680 C592,680 572,670 572,650 V560 Z" />
+    </clipPath>
+  </defs><g id="patient-body">
+    <ellipse id="hood-back" cx="512" cy="690" rx="178" ry="60" fill="#23847B" />
+    <g id="neck">
+      <path d="M452,560 V650 C452,670 432,680 392,680 L392,770 H632 V680 C592,680 572,670 572,650 V560 Z" fill="url(#skinV)" />
+      <ellipse cx="512" cy="612" rx="125" ry="46" fill="#C98A62" opacity="0.35" clip-path="url(#clipNeck)" />
+    </g>
+    <g id="torso">
+      <path d="M150,900 V840 C150,764 214,724 304,702 L392,680 C428,746 596,746 632,680 L720,702 C810,724 874,764 874,840 V900 Z" fill="url(#shirt)" />
+      <path d="M318,708 C292,770 280,830 278,900" fill="none" stroke="#1F7A72" stroke-width="5" stroke-linecap="round" opacity="0.3" />
+      <path d="M706,708 C732,770 744,830 746,900" fill="none" stroke="#1F7A72" stroke-width="5" stroke-linecap="round" opacity="0.3" />
+      <path id="hood-rim" d="M392,680 C428,746 596,746 632,680" fill="none" stroke="#23847B" stroke-width="24" stroke-linecap="round" />
+      <path d="M402,684 C436,740 588,740 622,684" fill="none" stroke="#4DB7AB" stroke-width="4" stroke-linecap="round" opacity="0.6" />
+      <g id="drawstrings" fill="none" stroke-linecap="round">
+        <path d="M470,732 C468,764 472,790 470,806" stroke="#E8F5F2" stroke-width="6" />
+        <path d="M554,732 C556,764 552,790 554,806" stroke="#E8F5F2" stroke-width="6" />
+        <path d="M470,806 V822" stroke="#BFDCD6" stroke-width="11" />
+        <path d="M554,806 V822" stroke="#BFDCD6" stroke-width="11" />
+      </g>
+    </g>
+  </g>
+  
+  </svg>

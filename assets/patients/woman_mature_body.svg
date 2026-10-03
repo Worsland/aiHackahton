@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><defs><linearGradient id="skinV" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E8BA94" /><stop offset="1" stop-color="#DAA077" />
+    </linearGradient>
+    <linearGradient id="top" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3C8D96" /><stop offset="1" stop-color="#2A6F79" />
+    </linearGradient>
+    <clipPath id="clipNeck">
+      <path d="M454,570 V656 L392,680 L392,790 H632 V680 L570,656 V570 Z" />
+    </clipPath>
+  </defs><g id="patient-body">
+    <g id="neck">
+      <path d="M454,570 V656 L392,680 L392,790 H632 V680 L570,656 V570 Z" fill="url(#skinV)" />
+      <ellipse cx="512" cy="628" rx="120" ry="44" fill="#C98A62" opacity="0.35" clip-path="url(#clipNeck)" />
+    </g>
+    <g id="torso">
+      <path d="M150,900 V840 C150,764 214,724 304,702 L392,680 L454,656 L512,742 L570,656 L632,680 L720,702 C810,724 874,764 874,840 V900 Z" fill="url(#top)" />
+      <path d="M318,708 C292,770 280,830 278,900" fill="none" stroke="#1D545C" stroke-width="5" stroke-linecap="round" opacity="0.3" />
+      <path d="M706,708 C732,770 744,830 746,900" fill="none" stroke="#1D545C" stroke-width="5" stroke-linecap="round" opacity="0.3" />
+      <g id="placket">
+        <path d="M512,748 V900" fill="none" stroke="#1D545C" stroke-width="5" stroke-linecap="round" opacity="0.5" />
+        <circle cx="512" cy="812" r="6" fill="#1D545C" opacity="0.8" />
+        <circle cx="512" cy="856" r="6" fill="#1D545C" opacity="0.8" />
+      </g>
+      <g id="collar" fill="#5AA6AE" stroke="#1D545C" stroke-width="6" stroke-linejoin="round">
+        <path d="M454,650 L512,740 L470,792 L408,690 Z" />
+        <path d="M570,650 L512,740 L554,792 L616,690 Z" />
+      </g>
+    </g>
+  </g>
+  
+  </svg>

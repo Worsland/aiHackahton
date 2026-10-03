@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><defs><radialGradient id="face" cx="0.5" cy="0.42" r="0.65">
+      <stop offset="0" stop-color="#EBC09B" /><stop offset="1" stop-color="#DCA47B" />
+    </radialGradient>
+    <clipPath id="clipHead">
+      <path d="M512,200 C616,200 682,280 682,392 C682,496 606,618 512,618 C418,618 342,496 342,392 C342,280 408,200 512,200 Z" />
+    </clipPath>
+    </defs><path id="face" d="M512,200 C616,200 682,280 682,392 C682,496 606,618 512,618 C418,618 342,496 342,392 C342,280 408,200 512,200 Z" fill="url(#face)" stroke="#CE9670" stroke-width="4" />
+
+    <g clip-path="url(#clipHead)">
+      <path transform="translate(0,14)" d="M470,238 C540,236 618,280 650,340 C656,362 660,396 662,430 C664,500 644,560 632,620 C626,680 616,700 614,724 C614,748 630,766 658,766 C688,766 706,750 706,712 C704,640 702,520 698,400 C696,262 624,178 512,178 C400,178 328,262 326,400 C322,520 320,640 318,712 C318,750 336,766 366,766 C394,766 410,748 410,724 C410,700 400,670 392,620 C380,560 360,500 362,430 C364,396 368,362 376,340 C388,290 420,250 470,238 Z" fill="#C98A62" opacity="0.2" />
+    </g>
+
+    <g id="cheeks" fill="#F59E0B" opacity="0.12">
+      <ellipse cx="416" cy="488" rx="32" ry="19" />
+      <ellipse cx="608" cy="488" rx="32" ry="19" />
+    </g>
+
+    <g id="face-lines" fill="none" stroke="#C98A62" stroke-width="4" stroke-linecap="round" opacity="0.2">
+      <path d="M420,434 Q442,444 464,434" />
+      <path d="M560,434 Q582,444 604,434" />
+      <path d="M474,506 C464,522 462,536 464,546" />
+      <path d="M550,506 C560,522 562,536 560,546" />
+    </g>
+
+    <g id="nose">
+      <ellipse cx="512" cy="466" rx="8" ry="13" fill="#FFFFFF" opacity="0.12" />
+      <path d="M497,490 C504,501 520,501 527,490" fill="none" stroke="#C98A62" stroke-width="5" stroke-linecap="round" />
+    </g>
+
+    </svg>

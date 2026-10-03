@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><defs><linearGradient id="hair" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#312A3A" /><stop offset="1" stop-color="#1F1A26" />
+    </linearGradient>
+    </defs><g id="hair">
+      <path d="M512,248 C450,260 396,298 376,340 C368,364 364,396 362,430 C360,500 380,560 392,620 C400,670 410,710 410,750 C412,782 396,808 366,808 C334,808 316,782 318,730 C322,640 322,520 326,400 C328,262 400,178 512,178 C624,178 696,262 698,400 C702,520 702,640 706,730 C708,782 690,808 658,808 C628,808 612,782 614,750 C614,710 624,670 632,620 C644,560 664,500 662,430 C660,398 656,364 648,340 C628,298 574,260 512,248 Z" fill="url(#hair)" />
+      <path d="M392,232 C450,198 574,198 632,232" fill="none" stroke="#4A4056" stroke-width="10" stroke-linecap="round" opacity="0.6" />
+      <path d="M346,470 C342,560 346,650 350,740" fill="none" stroke="#4A4056" stroke-width="8" stroke-linecap="round" opacity="0.35" />
+      <path d="M678,470 C682,560 678,650 674,740" fill="none" stroke="#4A4056" stroke-width="8" stroke-linecap="round" opacity="0.35" />
+    </g>
+  </svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><defs><linearGradient id="hair" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#DFE0E7" /><stop offset="1" stop-color="#C3C5D0" />
+    </linearGradient>
+    </defs><g id="hair">
+      <path d="M330,420 C314,320 372,182 512,180 C652,182 710,320 694,420 C690,394 682,372 668,352 C660,330 650,308 640,292 C612,284 560,268 512,266 C464,268 412,284 384,292 C374,308 364,330 356,352 C342,372 334,394 330,420 Z" fill="url(#hair)" stroke="#A3A6B5" stroke-width="4" stroke-linejoin="round" />
+      <path d="M400,228 C450,202 574,202 624,228" fill="none" stroke="#F6F6FA" stroke-width="9" stroke-linecap="round" opacity="0.85" />
+      <path d="M356,380 C352,392 350,404 350,414" fill="none" stroke="#A3A6B5" stroke-width="4" stroke-linecap="round" opacity="0.6" />
+      <path d="M668,380 C672,392 674,404 674,414" fill="none" stroke="#A3A6B5" stroke-width="4" stroke-linecap="round" opacity="0.6" />
+    </g>
+  </svg>

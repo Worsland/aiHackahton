@@ -1,0 +1,410 @@
+{
+  "language": "en",
+  "description": "Phone-validation questions for the offline scenarios. Each positive case expects the existing reply for its key point; repeat and fallback replies are selected from the listed options.",
+  "scenarios": [
+    {
+      "id": "fever_child",
+      "title": "Fièvre chez un enfant",
+      "cases": [
+        {
+          "id": "fever_duration_exact",
+          "type": "positive",
+          "question": "How long has he had the fever?",
+          "expectedKeyPointId": "duree",
+          "expectedReply": "It's been about two days now that he's been this hot, it's not really going down."
+        },
+        {
+          "id": "fever_duration_paraphrase",
+          "type": "positive",
+          "question": "When did he first start feeling unwell?",
+          "expectedKeyPointId": "duree",
+          "expectedReply": "It's been about two days now that he's been this hot, it's not really going down."
+        },
+        {
+          "id": "fever_duration_short",
+          "type": "positive",
+          "question": "Since when?",
+          "expectedKeyPointId": "duree",
+          "expectedReply": "It's been about two days now that he's been this hot, it's not really going down."
+        },
+        {
+          "id": "fever_net_exact",
+          "type": "positive",
+          "question": "Does he sleep under a mosquito net?",
+          "expectedKeyPointId": "moustiquaire",
+          "expectedReply": "He sleeps under a mosquito net, yes... well, not always, it has a hole in it."
+        },
+        {
+          "id": "fever_net_paraphrase",
+          "type": "positive",
+          "question": "How do you protect him from mosquito bites at night?",
+          "expectedKeyPointId": "moustiquaire",
+          "expectedReply": "He sleeps under a mosquito net, yes... well, not always, it has a hole in it."
+        },
+        {
+          "id": "fever_net_short",
+          "type": "positive",
+          "question": "A bed net?",
+          "expectedKeyPointId": "moustiquaire",
+          "expectedReply": "He sleeps under a mosquito net, yes... well, not always, it has a hole in it."
+        },
+        {
+          "id": "fever_travel_exact",
+          "type": "positive",
+          "question": "Have you travelled anywhere recently?",
+          "expectedKeyPointId": "voyage",
+          "expectedReply": "We went to see his grandmother in the village a week ago, in a pretty swampy area."
+        },
+        {
+          "id": "fever_travel_paraphrase",
+          "type": "positive",
+          "question": "Did you visit family outside this area in the last few weeks?",
+          "expectedKeyPointId": "voyage",
+          "expectedReply": "We went to see his grandmother in the village a week ago, in a pretty swampy area."
+        },
+        {
+          "id": "fever_travel_short",
+          "type": "positive",
+          "question": "Any recent trips?",
+          "expectedKeyPointId": "voyage",
+          "expectedReply": "We went to see his grandmother in the village a week ago, in a pretty swampy area."
+        },
+        {
+          "id": "fever_other_symptoms_exact",
+          "type": "positive",
+          "question": "Has he had any other symptoms, such as vomiting or unusual sleepiness?",
+          "expectedKeyPointId": "autres_symptomes",
+          "expectedReply": "He's very limp, he sleeps almost all the time, and he had chills last night."
+        },
+        {
+          "id": "fever_other_symptoms_paraphrase",
+          "type": "positive",
+          "question": "Is he difficult to wake or behaving differently?",
+          "expectedKeyPointId": "autres_symptomes",
+          "expectedReply": "He's very limp, he sleeps almost all the time, and he had chills last night."
+        },
+        {
+          "id": "fever_other_symptoms_short",
+          "type": "positive",
+          "question": "Any vomiting or fits?",
+          "expectedKeyPointId": "autres_symptomes",
+          "expectedReply": "He's very limp, he sleeps almost all the time, and he had chills last night."
+        },
+        {
+          "id": "fever_hydration_exact",
+          "type": "positive",
+          "question": "Is he still eating and drinking normally?",
+          "expectedKeyPointId": "hydratation",
+          "expectedReply": "He's drinking a bit less than usual, but he's still drinking, a little."
+        },
+        {
+          "id": "fever_hydration_paraphrase",
+          "type": "positive",
+          "question": "Has he been able to take fluids today?",
+          "expectedKeyPointId": "hydratation",
+          "expectedReply": "He's drinking a bit less than usual, but he's still drinking, a little."
+        },
+        {
+          "id": "fever_hydration_short",
+          "type": "positive",
+          "question": "Is he drinking?",
+          "expectedKeyPointId": "hydratation",
+          "expectedReply": "He's drinking a bit less than usual, but he's still drinking, a little."
+        },
+        {
+          "id": "fever_repeat",
+          "type": "repeat",
+          "setupQuestions": [
+            "How long has he had the fever?"
+          ],
+          "question": "When did it begin?",
+          "expectedReplyOptions": [
+            "I already told you that, didn't I?",
+            "Like I said earlier, yes."
+          ]
+        },
+        {
+          "id": "fever_unrelated",
+          "type": "fallback",
+          "question": "What is your favorite football team?",
+          "expectedReplyOptions": [
+            "I'm not really sure, doctor... do you think it's serious?",
+            "Hmm, I didn't really pay attention to that, sorry.",
+            "Could you repeat the question? I'm a bit lost."
+          ]
+        },
+        {
+          "id": "fever_greeting",
+          "type": "fallback",
+          "question": "Hello, how are you?",
+          "expectedReplyOptions": [
+            "I'm not really sure, doctor... do you think it's serious?",
+            "Hmm, I didn't really pay attention to that, sorry.",
+            "Could you repeat the question? I'm a bit lost."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "postpartum_bleeding",
+      "title": "Saignement post-partum",
+      "cases": [
+        {
+          "id": "postpartum_birth_time_exact",
+          "type": "positive",
+          "question": "How many days ago did you give birth?",
+          "expectedKeyPointId": "delai_accouchement",
+          "expectedReply": "I gave birth 5 days ago, at home with the neighborhood midwife."
+        },
+        {
+          "id": "postpartum_birth_time_paraphrase",
+          "type": "positive",
+          "question": "When did your baby arrive?",
+          "expectedKeyPointId": "delai_accouchement",
+          "expectedReply": "I gave birth 5 days ago, at home with the neighborhood midwife."
+        },
+        {
+          "id": "postpartum_birth_time_short",
+          "type": "positive",
+          "question": "When was the delivery?",
+          "expectedKeyPointId": "delai_accouchement",
+          "expectedReply": "I gave birth 5 days ago, at home with the neighborhood midwife."
+        },
+        {
+          "id": "postpartum_bleeding_amount_exact",
+          "type": "positive",
+          "question": "How heavy is the bleeding?",
+          "expectedKeyPointId": "quantite",
+          "expectedReply": "It's started again, heavier than the previous days, I have to change my cloth very often."
+        },
+        {
+          "id": "postpartum_bleeding_amount_paraphrase",
+          "type": "positive",
+          "question": "How often do you need to change the cloth you are using?",
+          "expectedKeyPointId": "quantite",
+          "expectedReply": "It's started again, heavier than the previous days, I have to change my cloth very often."
+        },
+        {
+          "id": "postpartum_bleeding_amount_short",
+          "type": "positive",
+          "question": "How much blood?",
+          "expectedKeyPointId": "quantite",
+          "expectedReply": "It's started again, heavier than the previous days, I have to change my cloth very often."
+        },
+        {
+          "id": "postpartum_fever_exact",
+          "type": "positive",
+          "question": "Have you had a fever?",
+          "expectedKeyPointId": "fievre",
+          "expectedReply": "Yes, I've felt a bit hot since yesterday, I thought it was just tiredness."
+        },
+        {
+          "id": "postpartum_fever_paraphrase",
+          "type": "positive",
+          "question": "Have you felt unusually hot or had chills?",
+          "expectedKeyPointId": "fievre",
+          "expectedReply": "Yes, I've felt a bit hot since yesterday, I thought it was just tiredness."
+        },
+        {
+          "id": "postpartum_fever_short",
+          "type": "positive",
+          "question": "Any fever?",
+          "expectedKeyPointId": "fievre",
+          "expectedReply": "Yes, I've felt a bit hot since yesterday, I thought it was just tiredness."
+        },
+        {
+          "id": "postpartum_smell_exact",
+          "type": "positive",
+          "question": "Does the discharge have an unusual smell?",
+          "expectedKeyPointId": "odeur",
+          "expectedReply": "Now that you mention it... yes, it's smelled a bit bad since this morning."
+        },
+        {
+          "id": "postpartum_smell_paraphrase",
+          "type": "positive",
+          "question": "Have you noticed a bad odor from the blood?",
+          "expectedKeyPointId": "odeur",
+          "expectedReply": "Now that you mention it... yes, it's smelled a bit bad since this morning."
+        },
+        {
+          "id": "postpartum_smell_short",
+          "type": "positive",
+          "question": "Any bad smell?",
+          "expectedKeyPointId": "odeur",
+          "expectedReply": "Now that you mention it... yes, it's smelled a bit bad since this morning."
+        },
+        {
+          "id": "postpartum_pain_exact",
+          "type": "positive",
+          "question": "Do you have pain in your lower belly?",
+          "expectedKeyPointId": "douleur",
+          "expectedReply": "I have pain in my lower belly, like cramps that keep coming back."
+        },
+        {
+          "id": "postpartum_pain_paraphrase",
+          "type": "positive",
+          "question": "Have you had cramps around your pelvis?",
+          "expectedKeyPointId": "douleur",
+          "expectedReply": "I have pain in my lower belly, like cramps that keep coming back."
+        },
+        {
+          "id": "postpartum_pain_short",
+          "type": "positive",
+          "question": "Any abdominal pain?",
+          "expectedKeyPointId": "douleur",
+          "expectedReply": "I have pain in my lower belly, like cramps that keep coming back."
+        },
+        {
+          "id": "postpartum_repeat",
+          "type": "repeat",
+          "setupQuestions": [
+            "Have you had a fever?"
+          ],
+          "question": "Have you felt hot or feverish?",
+          "expectedReplyOptions": [
+            "Like I told you, yes.",
+            "It's still the same as what I just said."
+          ]
+        },
+        {
+          "id": "postpartum_unrelated",
+          "type": "fallback",
+          "question": "What did you have for breakfast?",
+          "expectedReplyOptions": [
+            "I'm a little embarrassed to talk about it, but I'm listening.",
+            "Sorry, could you rephrase that?"
+          ]
+        },
+        {
+          "id": "postpartum_greeting",
+          "type": "fallback",
+          "question": "Good morning, how is your family?",
+          "expectedReplyOptions": [
+            "I'm a little embarrassed to talk about it, but I'm listening.",
+            "Sorry, could you rephrase that?"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dehydration",
+      "title": "Déshydratation",
+      "cases": [
+        {
+          "id": "dehydration_activity_exact",
+          "type": "positive",
+          "question": "What were you doing when you started feeling unwell?",
+          "expectedKeyPointId": "activite",
+          "expectedReply": "I spent the day in the field, it was very hot today."
+        },
+        {
+          "id": "dehydration_activity_paraphrase",
+          "type": "positive",
+          "question": "Were you outside working in the heat before this began?",
+          "expectedKeyPointId": "activite",
+          "expectedReply": "I spent the day in the field, it was very hot today."
+        },
+        {
+          "id": "dehydration_activity_short",
+          "type": "positive",
+          "question": "Working in the sun today?",
+          "expectedKeyPointId": "activite",
+          "expectedReply": "I spent the day in the field, it was very hot today."
+        },
+        {
+          "id": "dehydration_drinking_exact",
+          "type": "positive",
+          "question": "How much water did you drink today?",
+          "expectedKeyPointId": "boisson",
+          "expectedReply": "Well, I didn't drink much while I was working, I didn't have time."
+        },
+        {
+          "id": "dehydration_drinking_paraphrase",
+          "type": "positive",
+          "question": "Were you able to drink enough fluids while working?",
+          "expectedKeyPointId": "boisson",
+          "expectedReply": "Well, I didn't drink much while I was working, I didn't have time."
+        },
+        {
+          "id": "dehydration_drinking_short",
+          "type": "positive",
+          "question": "Did you drink enough?",
+          "expectedKeyPointId": "boisson",
+          "expectedReply": "Well, I didn't drink much while I was working, I didn't have time."
+        },
+        {
+          "id": "dehydration_urination_exact",
+          "type": "positive",
+          "question": "When did you last urinate?",
+          "expectedKeyPointId": "urines",
+          "expectedReply": "I haven't urinated since this morning I think, or just a little."
+        },
+        {
+          "id": "dehydration_urination_paraphrase",
+          "type": "positive",
+          "question": "Have you been passing urine as often as usual?",
+          "expectedKeyPointId": "urines",
+          "expectedReply": "I haven't urinated since this morning I think, or just a little."
+        },
+        {
+          "id": "dehydration_urination_short",
+          "type": "positive",
+          "question": "How often are you peeing?",
+          "expectedKeyPointId": "urines",
+          "expectedReply": "I haven't urinated since this morning I think, or just a little."
+        },
+        {
+          "id": "dehydration_symptoms_exact",
+          "type": "positive",
+          "question": "Do you feel dizzy or have muscle cramps?",
+          "expectedKeyPointId": "symptomes",
+          "expectedReply": "I get cramps in my legs and my head spins a bit when I stand up."
+        },
+        {
+          "id": "dehydration_symptoms_paraphrase",
+          "type": "positive",
+          "question": "Do you feel faint when you stand up, or have any weakness?",
+          "expectedKeyPointId": "symptomes",
+          "expectedReply": "I get cramps in my legs and my head spins a bit when I stand up."
+        },
+        {
+          "id": "dehydration_symptoms_short",
+          "type": "positive",
+          "question": "Any dizziness or cramps?",
+          "expectedKeyPointId": "symptomes",
+          "expectedReply": "I get cramps in my legs and my head spins a bit when I stand up."
+        },
+        {
+          "id": "dehydration_repeat",
+          "type": "repeat",
+          "setupQuestions": [
+            "How much water did you drink today?"
+          ],
+          "question": "Did you have enough to drink while working?",
+          "expectedReplyOptions": [
+            "I just told you that, didn't I?",
+            "Same as before."
+          ]
+        },
+        {
+          "id": "dehydration_unrelated",
+          "type": "fallback",
+          "question": "Can you tell me the date today?",
+          "expectedReplyOptions": [
+            "It's nothing, doctor, it's just work fatigue.",
+            "I don't really know what else to tell you."
+          ]
+        },
+        {
+          "id": "dehydration_greeting",
+          "type": "fallback",
+          "question": "Hi there, how is your day going?",
+          "expectedReplyOptions": [
+            "It's nothing, doctor, it's just work fatigue.",
+            "I don't really know what else to tell you."
+          ]
+        }
+      ]
+    }
+  ]
+}
