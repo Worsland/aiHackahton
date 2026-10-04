@@ -283,13 +283,17 @@ To use a different Firebase project:
 ## Run the app
 
 ```bash
-flutter run
+flutter run --dart-define=ILERA_AI_BACKEND_URL=https://ilera-ai-proxy-1067764995266.europe-west1.run.app
 ```
 
-To build an Android debug APK:
+The Gemini backend define is required for online conversations; see
+[Android setup and installation](#run-ilera-on-android-with-gemini-online).
+Without it, Gemini online is not configured in the app.
+
+To build an Android debug APK with Gemini online configured:
 
 ```bash
-flutter build apk --debug
+flutter build apk --debug --dart-define=ILERA_AI_BACKEND_URL=https://ilera-ai-proxy-1067764995266.europe-west1.run.app
 ```
 
 The Whisper plugin may request a newer Android NDK than the one currently
@@ -357,3 +361,32 @@ not generate or synthesize the patient's voice.
 - [Roadmap and product decisions](ROADMAP.md)
 - [Design notes](Design.md)
 - [Flutter dependencies and assets](pubspec.yaml)
+
+## Run Ilera on Android with Gemini online
+
+Install Flutter and the Android SDK, connect an Android phone with USB
+debugging enabled (or start an Android emulator), then run these commands
+from the project root in PowerShell:
+
+```powershell
+flutter pub get
+flutter devices
+flutter run -d <device-id> --dart-define=ILERA_AI_BACKEND_URL=https://ilera-ai-proxy-1067764995266.europe-west1.run.app
+```
+
+Replace `<device-id>` with the Android device ID shown by `flutter devices`.
+The `--dart-define` is required: it configures the app to send Gemini requests
+through the deployed, authenticated proxy instead of using offline practice.
+The phone or emulator needs internet access, and Firebase anonymous sign-in
+must be available.
+
+To build an APK instead of running directly on the connected device:
+
+```powershell
+flutter build apk --release --dart-define=ILERA_AI_BACKEND_URL=https://ilera-ai-proxy-1067764995266.europe-west1.run.app
+adb install -r build\app\outputs\flutter-apk\app-release.apk
+```
+
+The APK is arm64-only, matching the current LiteRT/Gemma Android
+configuration. The Android release build currently uses the project's debug
+signing key; it is suitable for local testing, not Play Store distribution.
