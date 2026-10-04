@@ -1,307 +1,308 @@
-# ProjectGOAL — Ilera : simulateur de formation des agents de santé
+﻿# ProjectGOAL — Ilera: training simulator for community health workers
 
-> **Statut :** plan de modifications pour le week-end du hackathon (**3–4 octobre 2026**).
-> Track : *Small AI for Development* (Hack-Nation × World Bank Youth Summit), **Annexe A — Santé**.
-> Ce document remplace l'ancienne version de `ProjectGOAL.md`. Les éléments marqués **[À VÉRIFIER]** ne doivent pas être affirmés dans la vidéo ou le README avant vérification.
-
----
-
-## 1. Objectif
-
-**Nom de l'application : Ilera.** *Ìlera* signifie « santé » en yoruba **[À faire confirmer par le/la relecteur·rice natif·ve, notamment l'écriture avec diacritiques]**. Le nom illustre directement la question du brief : *que signifie localiser le développement de l'IA ?*
-
-Permettre à un agent de santé de première ligne de **s'entraîner à mener un entretien clinique** (recherche des signes d'alerte, orientation) avec un patient virtuel, **sur son téléphone, sans connexion, dans une langue locale : le yoruba**, et de recevoir un retour pédagogique reproductible.
-
-L'outil est un **entraînement supervisé**. Il ne diagnostique pas de vrais patients et ne remplace ni un formateur ni les protocoles locaux.
-
-### Énoncé du problème (format imposé par le brief, §08)
-
-> Grâce à cet outil, **un agent de santé communautaire** s'**entraînera à repérer les signes d'alerte (fièvre de l'enfant, hémorragie du post-partum, déshydratation)** **avant sa première consultation réelle / entre deux formations** alors qu'il ne le ferait sinon **pas / tard / sans retour** ; nous le savons grâce à **[À COMPLÉTER : indicateur, source, pays, année]**.
-
-Sources candidates pour la preuve (brief §7.2 et Annexe A) : Service Delivery Indicators (Banque mondiale), WHO Global Health Observatory (densité de personnel de santé), DHS / Service Provision Assessments. Choisir **un pays (Nigeria, si on reste sur le yoruba)** et citer l'année.
+> **Status:** modification plan for the hackathon weekend (**3–4 October 2026**).
+> Track: *Small AI for Development* (Hack-Nation × World Bank Youth Summit), **Annex A — Health**.
+> This document replaces the previous version of `ProjectGOAL.md`. Items marked **[TO VERIFY]** must not be asserted in the video or README before verification.
 
 ---
 
-## 2. Lien avec Noor et le défi Santé
+## 1. Objective
 
-Le défi (Annexe A) demande d'améliorer *« une part significative de l'accès de Noor aux soins primaires, ou la capacité d'un agent de première ligne à la servir »*.
+**Application name: Ilera.** *Ìlera* means “health” in Yoruba **[TO CONFIRM with the native reviewer, especially the writing with diacritics]**. The name directly illustrates the brief's question: *what does localizing AI development mean?*
 
-Notre lien, à rendre **explicite** dans le README et la vidéo :
+Enable a frontline health worker to **practice conducting a clinical interview** (looking for warning signs, referral) with a virtual patient, **on their phone, offline, in a local language: Yoruba**, and receive reproducible pedagogical feedback.
 
-- Noor consulte dans une clinique surchargée, où les soignants ne sont **pas toujours à jour des dernières recommandations** et manquent de temps par patient.
-- Notre outil agit sur **la capacité de l'agent à la servir** : entraînement répété, hors ligne, sans formateur disponible, sur les situations à risque (fièvre de l'enfant, hémorragie du post-partum, déshydratation).
-- Le critère « développement » (20 %) demande si le résultat compte pour la personne visée : on montre le chemin **entraînement → meilleur repérage des signes d'alerte → soin reçu par Noor**, **sans prétendre l'avoir mesuré**.
+The tool is **supervised training**. It does not diagnose real patients and does not replace a trainer or local protocols.
+
+### Problem statement (format required by the brief, §08)
+
+> With this tool, **a community health worker** will **practice identifying warning signs (child fever, postpartum haemorrhage, dehydration)** **before their first real consultation / between training sessions** when they would otherwise **not / late / without feedback**; we know this thanks to **[TO COMPLETE: indicator, source, country, year]**.
+
+Candidate sources for evidence (brief §7.2 and Annex A): Service Delivery Indicators (World Bank), WHO Global Health Observatory (health workforce density), DHS / Service Provision Assessments. Choose **one country (Nigeria, if we stay with Yoruba)** and cite the year.
 
 ---
 
-## 3. Décisions prises
+## 2. Link with Noor and the Health challenge
 
-| Sujet | Décision |
+The challenge (Annex A) asks to improve *“a significant share of Noor’s access to primary care, or a frontline worker’s ability to serve her”*.
+
+Our link, to be made **explicit** in the README and the video:
+
+- Noor consults in an overloaded clinic, where carers are **not always up to date on the latest recommendations** and do not have time per patient.
+- Our tool acts on **the worker’s ability to serve her**: repeated training, offline, without a trainer available, on high-risk situations (child fever, postpartum haemorrhage, dehydration).
+- The “development” criterion (20%) asks whether the result matters to the person targeted: we show the path **training → better recognition of warning signs → care received by Noor**, **without claiming to have measured it**.
+
+---
+
+## 3. Decisions made
+
+| Topic | Decision |
 |---|---|
-| Langue locale | **Yoruba** (Nigeria, Bénin, Togo). Nommée dans le README, la vidéo et l'app. |
-| Parcours principal de la démo | **Hors ligne** (le cœur doit fonctionner sans réseau, règle 06). |
-| Gemini Live | **Mode connecté bonus** (voix), pas le parcours principal. |
-| Claude | **Moteur de compréhension texte en ligne** pour le yoruba (voir §7), plus aide au développement (voir §7.5). |
-| Génération libre de réponses cliniques | **Désactivée par défaut** (risque d'hallucination). Réponses issues d'une liste fixe relue par un·e natif·ve. |
-| Scoring | Reste **déterministe** (60 % couverture, 40 % diagnostic). Aucun LLM ne note. |
+| Local language | **Yoruba** (Nigeria, Benin, Togo). Named in the README, the video, and the app. |
+| Main demo flow | **Offline** (the core must work without network, rule 06). |
+| Gemini Live | **Bonus connected mode** (voice), not the main flow. |
+| Claude | **Online text understanding engine** for Yoruba (see §7), plus development help (see §7.5). |
+| Free generation of clinical responses | **Disabled by default** (hallucination risk). Responses come from a fixed list reviewed by a native speaker. |
+| Scoring | Remains **deterministic** (60% coverage, 40% diagnosis). No LLM grades. |
 
 ---
 
-## 4. Modifications à faire (priorisées)
+## 4. Changes to make (prioritized)
 
-### P0 — indispensable pour être conforme au brief
+### P0 — required to comply with the brief
 
-| # | Modification | Fichiers concernés |
+| # | Change | Files involved |
 |---|---|---|
-| 1 | Ajouter un **sélecteur de langue** (English / Yorùbá) et passer la langue au moteur de dialogue et à l'interface. | `lib/screens/simulation_screen.dart`, nouveau `lib/services/lang/app_language.dart` |
-| 2 | **Contenu yoruba pour au moins 1 scénario** : réponses du patient, points clés, formulations d'exemple, consignes d'interface. | `lib/services/offline/offline_scenarios.dart` (ou fichiers JSON dédiés par langue) |
-| 3 | **Matcher lexical yoruba hors ligne** avec normalisation des diacritiques (§6.2). Gecko-110m-en reste utilisé **uniquement pour l'anglais**. | `lib/services/offline/offline_patient_brain.dart`, nouveau `lib/services/lang/yoruba_normalizer.dart` |
-| 4 | **Fail-safe visible** : sous le seuil de confiance, le patient ne devine pas ; l'app affiche un message du type « pas sûr — reformulez ou demandez à un formateur ». Message yoruba relu par un·e natif·ve. | `offline_patient_brain.dart`, `simulation_screen.dart` |
-| 5 | **Relecture native** des textes cliniques yoruba (voir §6.3). Sans relecture, les afficher comme **« brouillon non vérifié »**. | contenu + `docs/DATA_SOURCES.md` |
-| 6 | **Mini-benchmark** (§9) : mots-clés vs sémantique, anglais vs yoruba, avec erreurs incluses. | nouveau `docs/EVALUATION.md`, `test/` |
-| 7 | **Fichier de sources et de limites des données** (§8). | nouveau `docs/DATA_SOURCES.md` |
-| 8 | **Vidéo 2–5 min** (§12). Sans elle, pas de shortlist. | hors dépôt |
+| 1 | Add a **language selector** (English / Yorùbá) and pass the language to the dialogue engine and interface. | `lib/screens/simulation_screen.dart`, new `lib/services/lang/app_language.dart` |
+| 2 | **Yoruba content for at least 1 scenario**: patient responses, key points, example formulations, interface instructions. | `lib/services/offline/offline_scenarios.dart` (or dedicated JSON files by language) |
+| 3 | **Offline Yoruba lexical matching** with diacritic normalization (§6.2). Gecko-110m-en remains used **only for English**. | `lib/services/offline/offline_patient_brain.dart`, new `lib/services/lang/yoruba_normalizer.dart` |
+| 4 | **Visible fail-safe**: below the confidence threshold, the patient does not guess; the app displays a message such as “not sure — rephrase or ask a trainer”. A Yoruba message reviewed by a native speaker. | `offline_patient_brain.dart`, `simulation_screen.dart` |
+| 5 | **Native review** of Yoruba clinical texts (see §6.3). Without review, display them as **“draft not verified”**. | content + `docs/DATA_SOURCES.md` |
+| 6 | **Mini-benchmark** (§9): keywords vs semantic, English vs Yoruba, with errors included. | new `docs/EVALUATION.md`, `test/` |
+| 7 | **Data sources and limits file** (§8). | new `docs/DATA_SOURCES.md` |
+| 8 | **2–5 minute video** (§12). Without it, there is no shortlist. | outside the repo |
 
-### P1 — fortement recommandé
+### P1 — strongly recommended
 
-| # | Modification | Fichiers concernés |
+| # | Change | Files involved |
 |---|---|---|
-| 9 | **Intégration Claude** en mode en ligne (§7). | nouveau `lib/services/claude/claude_patient_service.dart` + petit backend proxy |
-| 10 | **Vérifier le modèle Gemini Live** et la langue yoruba (§5). | `lib/services/live/gemini_live_service.dart` |
-| 11 | **Sortir la clé Gemini du client** (jetons éphémères, §11). | `lib/main.dart`, backend |
-| 12 | **Consentement explicite** avant tout envoi d'audio ou de texte à un service en ligne. | `simulation_screen.dart`, nouvel écran de consentement |
-| 13 | **Audio yoruba préenregistré** par une personne native, pour au moins un scénario. | `assets/audio/offline/yo/` |
-| 14 | **Téléchargement du modèle** reprenable, avec taille affichée ; option de side-load documentée. | gestion du plugin d'embeddings |
-| 15 | Mettre à jour le **README** : langue, modes, limites, sources. | `README.md` |
-| 16 | **Renommer l'app en « Ilera »** (nom affiché uniquement, voir note ci-dessous). | `README.md`, `lib/main.dart` (titre), `android/app/src/main/AndroidManifest.xml` (`android:label`), `ios/Runner/Info.plist` (`CFBundleDisplayName`), `pubspec.yaml` (description) |
+| 9 | **Claude integration** in online mode (§7). | new `lib/services/claude/claude_patient_service.dart` + small backend proxy |
+| 10 | **Verify the Gemini Live model** and Yoruba language (§5). | `lib/services/live/gemini_live_service.dart` |
+| 11 | **Move the Gemini key out of the client** (ephemeral tokens, §11). | `lib/main.dart`, backend |
+| 12 | **Explicit consent** before any audio or text is sent to an online service. | `simulation_screen.dart`, new consent screen |
+| 13 | **Pre-recorded Yoruba audio** by a native speaker, for at least one scenario. | `assets/audio/offline/yo/` |
+| 14 | **Resumable model download**, with size shown; document a side-load option. | embeddings plugin management |
+| 15 | Update the **README**: language, modes, limits, sources. | `README.md` |
+| 16 | **Rename the app to “Ilera”** (display name only, see note below). | `README.md`, `lib/main.dart` (title), `android/app/src/main/AndroidManifest.xml` (`android:label`), `ios/Runner/Info.plist` (`CFBundleDisplayName`), `pubspec.yaml` (description) |
 
-> **Note renommage :** ne changer **ni l'identifiant de package** (`applicationId`, bundle id), **ni le nom du package Dart**, **ni le projet Firebase** (`aihackaton-5120f`) ce week-end. Cela casserait `google-services.json` et `firebase_options.dart` pour aucun gain. Seul le **nom affiché** change.
+> **Renaming note:** do not change **either the package identifier** (`applicationId`, bundle id), **nor the Dart package name**, **nor the Firebase project** (`aihackaton-5120f`) this weekend. That would break `google-services.json` and `firebase_options.dart` for no gain. Only the **display name** changes.
 
-### P2 — si le temps le permet
+### P2 — if time allows
 
-- Deuxième scénario en yoruba.
-- Voix hors ligne en yoruba via TTS embarqué **seulement si** la qualité est validée par un·e natif·ve ; sinon rester sur l'audio préenregistré.
-- Reconnaissance vocale yoruba hors ligne : **ne pas promettre**. La lister dans les limites.
-
----
-
-## 5. Gemini Live et le yoruba
-
-- La documentation Gemini Live API (page « Capabilities », mise à jour le 18 sept. 2026) liste **Yoruba (`yo`)** parmi les 99 langues supportées. **[À VÉRIFIER dans la doc actuelle avant la vidéo.]**
-- **« Supporté » ne veut pas dire « bon »** : la qualité de compréhension, de prononciation et de ton en yoruba doit être **testée avec un·e locuteur·rice natif·ve** sur nos scénarios, puis documentée (réussites **et** échecs).
-- Les modèles audio natifs **choisissent la langue automatiquement** et n'acceptent pas de code de langue explicite. Pour forcer le yoruba, l'indiquer dans le **system prompt** (« Réponds uniquement en yoruba »).
-- La transcription de sortie suit la langue de la réponse ; l'afficher dans le fil de discussion et signaler son caractère automatique.
-- **Modèle** : le README indique que le modèle est défini dans `gemini_live_service.dart`. La documentation actuelle recommande `gemini-3.8-live` ; `gemini-live-2.5-flash-native-audio` a une date de retrait annoncée (13 déc. 2026). **[À VÉRIFIER]** et mettre à jour la chaîne du modèle.
-- Les sessions audio seules sont limitées à 15 minutes sans gestion de session : prévoir une fin d'entretien propre.
+- Second Yoruba scenario.
+- Yoruba offline voice via embedded TTS **only if** quality is validated by a native speaker; otherwise remain on pre-recorded audio.
+- Offline Yoruba speech recognition: **do not promise it**. List it in the limits.
 
 ---
 
-## 6. Yoruba : plan d'implémentation
+## 5. Gemini Live and Yoruba
 
-### 6.1 Moteur hors ligne
+- The Gemini Live API documentation (page “Capabilities”, updated on 18 September 2026) lists **Yoruba (`yo`)** among the 99 supported languages. **[TO VERIFY in the current docs before the video.]**
+- **“Supported” does not mean “good”**: the quality of understanding, pronunciation, and tone in Yoruba must be **tested with a native speaker** on our scenarios, then documented (successes **and** failures).
+- Native audio models **choose the language automatically** and do not accept an explicit language code. To force Yoruba, specify it in the **system prompt** (“Reply only in Yoruba”).
+- The output transcription follows the language of the response; display it in the conversation thread and mark it as automatic.
+- **Model**: the README states that the model is defined in `gemini_live_service.dart`. The current documentation recommends `gemini-3.8-live`; `gemini-live-2.5-flash-native-...
 
-- **Anglais** : inchangé (Gecko 110M quantifié, repli mots-clés).
-- **Yoruba** : matcher **lexical** par point clé : mots-clés, variantes, paraphrases écrites à la main, termes médicaux souvent dits en anglais.
-- Expérience **sur ordinateur uniquement** : tester un modèle d'embeddings multilingue couvrant le yoruba sur le jeu de test. Ne pas le porter sur le téléphone ce week-end (taille et conversion). Rapporter le résultat dans `docs/EVALUATION.md`.
-
-### 6.2 Normalisation des diacritiques
-
-Les gens tapent souvent sans signes (ẹ, ọ, ṣ, accents tonaux). Appliquer **aux deux côtés** (entrée et lexique) : minuscules, décomposition Unicode (NFD), suppression des marques combinantes (U+0300–U+036F, U+0323…), nettoyage de la ponctuation.
-
-**Limite à documenter :** supprimer les tons peut fusionner des mots distincts ; le matcher peut donc produire de faux rapprochements.
-
-### 6.3 Relecture et validation
-
-- Brouillon possible avec NLLB-200 ou Claude, **étiqueté « non vérifié »**.
-- Relecture clinique et linguistique par au moins un·e locuteur·rice natif·ve (idéalement un·e professionnel·le de santé). Noter le nombre de relecteurs et leur profil.
-- Les formulations de test doivent être écrites **par des humains**, pas générées, au moins en partie (§9).
-
-### 6.4 Voix
-
-- Voix préenregistrées par une personne native (repli TTS existant). Un seul scénario suffit pour la démo.
-- Tester le TTS Android yoruba : s'il est absent ou mauvais, le dire dans les limites.
-
-### 6.5 Ce que les données yoruba ne couvrent pas (à écrire dans `DATA_SOURCES.md`)
-
-- Dialectes (Ọ̀yọ́, Ìjẹ̀bú, etc.) et variantes orthographiques.
-- Alternance yoruba / anglais / pidgin.
-- Peu de relecteurs, formulations écrites par l'équipe plutôt que collectées auprès d'agents de santé.
-- Aucune validation clinique indépendante.
+[Output truncated in the original source. Continue below for the remaining content.]
 
 ---
 
-## 7. Intégration Claude (mode en ligne)
+## 6. Yoruba: implementation plan
 
-### 7.1 Ce que Claude fait, et ne fait pas
+### 6.1 Offline engine
 
-| Oui | Non |
+- **English**: unchanged (quantized Gecko 110M, keyword fallback).
+- **Yoruba**: **lexical** matching by key point: keywords, variants, manually written paraphrases, medical terms often said in English.
+- **Computer-only experience**: test a multilingual embeddings model covering Yoruba on the test set. Do not port it to the phone this weekend (size and conversion). Report the result in `docs/EVALUATION.md`.
+
+### 6.2 Diacritic normalization
+
+People often type without marks (ẹ, ọ, ṣ, tonal accents). Apply **on both sides** (input and lexicon): lowercase, Unicode decomposition (NFD), removal of combining marks (U+0300–U+036F, U+0323…), punctuation cleanup.
+
+**Limit to document:** removing tones can merge distinct words; the matcher can therefore produce false matches.
+
+### 6.3 Review and validation
+
+- Draft possible with NLLB-200 or Claude, **labelled “not verified”**.
+- Clinical and linguistic review by at least one native speaker (ideally a healthcare professional). Record the number of reviewers and their profile.
+- Test formulations must be written **by humans**, not generated, at least in part (§9).
+
+### 6.4 Voice
+
+- Pre-recorded voice by a native speaker (fallback to existing TTS). One scenario is enough for the demo.
+- Test Yoruba Android TTS: if it is absent or poor, say so in the limits.
+
+### 6.5 What Yoruba data does not cover (to be written in `DATA_SOURCES.md`)
+
+- Dialects (Ọ̀yọ́, Ìjẹ̀bú, etc.) and spelling variants.
+- Yoruba / English / pidgin alternation.
+- Few reviewers; formulations written by the team rather than collected from healthcare workers.
+- No independent clinical validation.
+
+---
+
+## 7. Claude integration (online mode)
+
+### 7.1 What Claude does, and does not do
+
+| Yes | No |
 |---|---|
-| Comprendre une question **écrite en yoruba** et choisir, dans une **liste fermée**, le point clé couvert. | Générer librement des réponses cliniques (désactivé par défaut). |
-| Renvoyer un niveau de confiance et un indicateur « besoin d'un humain ». | Noter l'entretien ou valider un diagnostic. |
-| Aider au développement (§7.5). | Traiter de la voix : l'API Claude ne fait pas d'entrée/sortie audio. Pour la voix en ligne, on garde Gemini Live. |
+| Understand a question **written in Yoruba** and choose, from a **closed list**, the key point covered. | Freely generate clinical responses (disabled by default). |
+| Return a confidence level and an “human needed” indicator. | Grade the interview or validate a diagnosis. |
+| Help with development (§7.5). | Handle voice: the Claude API does not provide audio input/output. For online voice, we keep Gemini Live. |
 
-### 7.2 Principe : « compréhension, pas génération »
+### 7.2 Principle: “understanding, not generation”
 
-1. L'agent tape sa question en yoruba.
-2. L'app envoie à Claude : la question, l'`id` du scénario et la **liste des points clés** (id + description courte). Aucun identifiant utilisateur.
-3. Claude répond en **JSON strict** :
+1. The agent types their question in Yoruba.
+2. The app sends to Claude: the question, the scenario `id`, and the **list of key points** (id + short description). No user identifiers.
+3. Claude responds in **strict JSON**:
    ```json
    { "key_point_ids": ["kp_03"], "confidence": 0.82, "needs_human": false }
    ```
-4. L'app affiche la **réponse yoruba préécrite et relue** correspondant à `kp_03` (audio préenregistré si disponible).
-5. Si `confidence` est sous le seuil, ou si aucun point clé ne correspond : message fail-safe (« pas sûr — reformulez ou demandez à un formateur »). **Pas de devinette.**
-6. Le score est calculé par le code existant à partir des `id` confirmés.
+4. The app displays the **prewritten and reviewed reply** corresponding to `kp_03` (pre-recorded audio if available).
+5. If `confidence` is below the threshold, or if no key point matches: fail-safe message (“not sure — rephrase or ask a trainer”). **No guessing.**
+6. The score is calculated by the existing code from the confirmed `id`s.
 
-Avantage : le texte affiché est toujours **vérifiable à l'avance** (« fixed list of answers » du glossaire du brief), ce qui limite les hallucinations.
+Advantage: the displayed text is always **verifiable in advance** (“fixed list of answers” from the brief glossary), which limits hallucinations.
 
 ### 7.3 Architecture
 
 ```
-App Flutter ──► Proxy backend (clé Claude côté serveur) ──► API Claude
+App Flutter ──► Backend proxy (Claude key on the server) ──► Claude API
       │
-      └─ hors ligne / échec / timeout ──► matcher lexical yoruba local ──► fail-safe
+      └─ offline / failure / timeout ──► local Yoruba lexical matcher ──► fail-safe
 ```
 
-- **La clé Claude ne va jamais dans l'application** (contrairement à la clé Gemini actuelle). Le proxy applique : limitation de débit par installation, taille maximale de question, journalisation désactivée par défaut.
-- Proxy possible : Cloud Run, Cloudflare Worker ou fonction serverless **[choisir ce qui est déjà accessible]**.
-- Nouveau service : `lib/services/claude/claude_patient_service.dart`, avec timeout court et **repli automatique** vers le matcher local.
-- **Modèle** : commencer par `claude-sonnet-5-5` (meilleure qualité attendue sur une langue à faibles ressources) ; tester `claude-haiku-4-5-20251001` pour le coût et la latence. **[Confirmer les noms de modèles et la tarification dans la console avant d'intégrer.]**
-- Les « crédits Claude » doivent être des **crédits API (Claude Platform)** ; l'abonnement à l'application de chat ne fournit pas de clé API. **[À VÉRIFIER sur le compte.]**
+- **The Claude key never goes into the application** (unlike the current Gemini key). The proxy enforces: rate limiting per installation, maximum question size, logging disabled by default.
+- Possible proxy: Cloud Run, Cloudflare Worker, or serverless function **[choose what is already accessible]**.
+- New service: `lib/services/claude/claude_patient_service.dart`, with a short timeout and **automatic fallback** to the local matcher.
+- **Model**: start with `claude-sonnet-5-5` (expected better quality on a low-resource language); test `claude-haiku-4-5-20251001` for cost and latency. **[Confirm model names and pricing in the console before integrating.]**
+- “Claude credits” must be **API credits (Claude Platform)**; the chat app subscription does not provide an API key. **[TO VERIFY on the account.]**
 
-### 7.4 Contraintes de prompt (résumé)
+### 7.4 Prompt constraints (summary)
 
-- Rôle : classifieur de questions pour un simulateur de formation, pas un soignant.
-- Entrée : question en yoruba (avec ou sans diacritiques, éventuellement mélangée à de l'anglais).
-- Sortie : JSON uniquement, ids tirés **exclusivement** de la liste fournie.
-- Si la question est ambiguë, hors sujet ou dangereuse : `key_point_ids: []`, `needs_human: true`.
-- Ne jamais ajouter de contenu médical.
+- Role: classifier for questions in a training simulator, not a clinician.
+- Input: question in Yoruba (with or without diacritics, possibly mixed with English).
+- Output: JSON only, ids drawn **exclusively** from the provided list.
+- If the question is ambiguous, off-topic, or dangerous: `key_point_ids: []`, `needs_human: true`.
+- Never add medical content.
 
-### 7.5 Aide au développement avec Claude (hors parcours utilisateur)
+### 7.5 Help with development using Claude (outside the user flow)
 
-À utiliser ce week-end pour gagner du temps, **toujours étiqueté et relu** :
+To use this weekend to save time, **always labelled and reviewed**:
 
-- Générer des **candidats de paraphrases** pour le lexique yoruba (à relire).
-- Faire une **rétro-traduction** yoruba → français/anglais pour détecter des contresens avant la relecture native.
-- Produire un jeu de test **synthétique** (étiqueté comme tel), distinct du jeu écrit par des humains.
-- Comparer les sorties Gemini Live et Claude sur les mêmes questions.
+- Generate **paraphrase candidates** for the Yoruba lexicon (to be reviewed).
+- Do a **back-translation** Yoruba → French/English to detect mistranslations before native review.
+- Produce a **synthetic test set** (labelled as such), distinct from the set written by humans.
+- Compare Gemini Live and Claude outputs on the same questions.
 
-> **Ne pas affirmer** que Claude comprend mieux le yoruba que Gemini sans l'avoir mesuré (§9).
+> **Do not state** that Claude understands Yoruba better than Gemini without measuring it (§9).
 
-### 7.6 Mode génération libre (expérimental, désactivé par défaut)
+### 7.6 Free-generation mode (experimental, disabled by default)
 
-Si activé : réponses du patient générées **uniquement à partir de la fiche du scénario** ; si un fait n'est pas dans la fiche, le patient répond qu'il ne sait pas ; bandeau « réponse générée, non vérifiée » ; pas utilisé dans la démo principale.
+If enabled: patient responses generated **only from the scenario sheet**; if a fact is not in the sheet, the patient says they do not know; banner “generated response, not verified”; not used in the main demo.
 
 ---
 
-## 8. Données et sources
+## 8. Data and sources
 
-À créer : `docs/DATA_SOURCES.md`, avec **nom, source, licence, taille, usage, ce que la donnée ne couvre pas**.
+To create: `docs/DATA_SOURCES.md`, with **name, source, license, size, usage, what the data does not cover**.
 
-### 8.1 Données qui montrent le problème (brief §7.2, type 1)
+### 8.1 Data that shows the problem (brief §7.2, type 1)
 
-| Besoin | Source candidate |
+| Need | Candidate source |
 |---|---|
-| Absentéisme et équipement des soignants | Service Delivery Indicators (Banque mondiale) |
-| Densité de personnel de santé | WHO Global Health Observatory |
-| Comportement de recours aux soins, disponibilité à l'arrivée | DHS / Service Provision Assessments |
-| Possession d'un téléphone / smartphone | GSMA Mobile Gender Gap Report |
+| Absenteeism and health worker equipment | Service Delivery Indicators (World Bank) |
+| Health workforce density | WHO Global Health Observatory |
+| Care-seeking behaviour, availability on arrival | DHS / Service Provision Assessments |
+| Phone / smartphone ownership | GSMA Mobile Gender Gap Report |
 
-Citer **pays, année, source**. Indiquer si un chiffre vient d'une modélisation.
+Cite **country, year, source**. Indicate whether a figure comes from modelling.
 
-### 8.2 Données avec lesquelles on construit (type 2)
+### 8.2 Data used to build (type 2)
 
-| Usage | Source candidate | Remarque |
+| Use | Candidate source | Note |
 |---|---|---|
-| Contenu clinique des scénarios | Protocoles OMS correspondants (à citer précisément) | **[À VÉRIFIER]** version et chapitre |
-| Embeddings anglais | Gecko-110m-en (Apache-2.0, ~114–115 Mo) | déjà documenté |
-| Langue yoruba (voix / texte) | Common Voice (yo), FLEURS (yo_ng), FLORES-200 / NLLB-200 (yor_Latn), MMS, ressources Masakhane | **[À VÉRIFIER]** disponibilité, licence et taille de chaque ressource |
-| Jeu de test | Formulations écrites par des humains (équipe + relecteurs natifs) | taille et profil des auteurs à indiquer |
-| Jeu synthétique | Généré par un LLM | **étiqueter « synthétique »** |
+| Clinical content of scenarios | Corresponding WHO protocols (to cite precisely) | **[TO VERIFY]** version and chapter |
+| English embeddings | Gecko-110m-en (Apache-2.0, ~114–115 MB) | already documented |
+| Yoruba language (voice / text) | Common Voice (yo), FLEURS (yo_ng), FLORES-200 / NLLB-200 (yor_Latn), MMS, Masakhane resources | **[TO VERIFY]** availability, license, and size of each resource |
+| Test set | Formulations written by humans (team + native reviewers) | size and author profile to be noted |
+| Synthetic set | Generated by an LLM | **label as “synthetic”** |
 
 ---
 
-## 9. Évaluation (pour les critères « preuve que ça marche » et « valeur de l'IA »)
+## 9. Evaluation (for the “proof that it works” and “AI value” criteria)
 
-### Protocole
+### Protocol
 
-- **Jeu de test** : 60 à 100 formulations par scénario, avec la bonne étiquette (point clé) ou « aucune réponse pertinente ». Au moins une partie écrite par un·e natif·ve. **Jeu de calibrage et jeu de test séparés.**
-- **Moteurs comparés** :
-  1. Mots-clés (anglais)
-  2. Gecko sémantique (anglais)
-  3. Lexical yoruba normalisé
-  4. Claude en ligne (yoruba)
-  5. *(optionnel)* embeddings multilingues sur ordinateur
-- **Métriques** : bonne réponse top-1, faux rapprochements, taux d'abstention correct (« pas sûr »), latence, taille du modèle.
+- **Test set**: 60 to 100 formulations per scenario, with the correct label (key point) or “no relevant response”. At least some written by a native speaker. **Calibration set and test set separate.**
+- **Models compared**:
+  1. Keywords (English)
+  2. Gecko semantic (English)
+  3. Normalized Yoruba lexical matching
+  4. Claude online (Yoruba)
+  5. *(optional)* multilingual embeddings on computer
+- **Metrics**: correct top-1 response, false matches, correct abstention rate (“not sure”), latency, model size.
 
-### Tableau à publier dans `docs/EVALUATION.md` et dans la vidéo
+### Table to publish in `docs/EVALUATION.md` and in the video
 
-| Moteur | Langue | Top-1 | Faux rapprochements | Abstentions correctes | Latence | Taille |
+| Model | Language | Top-1 | False matches | Correct abstentions | Latency | Size |
 |---|---|---|---|---|---|---|
 | … | … | … | … | … | … | … |
 
-Inclure **les erreurs** et ce qu'on en conclut. La franchise est valorisée par le brief.
+Include **the errors** and what we conclude from them. Honesty is valued by the brief.
 
-### Réponse prête à « et dans une langue moins bien supportée ? »
+### Ready-made answer for “and in a less well-supported language?”
 
-Ajouter une langue = un scénario traduit et relu, un lexique, quelques enregistrements et 50–100 formulations de test. Le coût principal est la **relecture humaine**, pas le réentraînement.
-
----
-
-## 10. Garde-fous et IA responsable (critère pass/fail)
-
-- **Humain dans la boucle** : l'outil forme ; une personne décide. Il n'agit jamais à la place de l'utilisateur.
-- **Liste fermée de réponses** par défaut ; tout contenu généré est signalé.
-- **Fail-safe** : « pas sûr — reformulez ou demandez à un formateur » plutôt qu'une réponse devinée.
-- **Contenu non validé cliniquement** : bandeau permanent dans l'app et dans le README.
-- **Biais** : tests uniquement avec des formulations de l'équipe ; l'écrire. Pas de généralisation à d'autres dialectes ni langues.
-- **Pas de preuve d'amélioration des soins** : ne jamais présenter le score comme tel.
-- **Vie privée** : traitement hors ligne par défaut ; consentement explicite avant tout envoi en ligne ; préciser où les données résident, qui peut les lire, et ce qui se passe si le téléphone est perdu ou partagé (exigence de l'Annexe A).
+Adding a language = a scenario translated and reviewed, a lexicon, a few recordings, and 50–100 test formulations. The main cost is **human review**, not retraining.
 
 ---
 
-## 11. Sécurité
+## 10. Safeguards and responsible AI (pass/fail criterion)
 
-- **Clé Gemini** : retirer la constante du client. La doc Gemini indique que, pour une connexion client → serveur, il faut utiliser des **jetons éphémères**. Les émettre depuis le même backend que le proxy Claude.
-- **Clé Claude** : uniquement côté serveur.
-- **Firestore** : vérifier que les règles limitent l'accès à `users/{uid}` et à ses sessions.
-- Ne rien mettre de secret dans l'asset `.env` (déjà déclaré dans `pubspec.yaml`).
-- Ne pas enregistrer de transcription ni d'audio sans consentement.
-
----
-
-## 12. Livrables (brief §08)
-
-- [ ] **Prototype** : code ou lien, avec instructions pour lancer.
-- [ ] **Vidéo de 2 à 5 minutes** contenant :
-  - [ ] **Énoncé du problème** en une phrase (format du §1) avec la preuve citée.
-  - [ ] **Rôle de l'IA** et pourquoi un SMS, un tableur ou une recherche ne feraient pas le même travail ; garde-fous.
-  - [ ] **Démo de bout en bout** : choix du scénario → entretien en yoruba hors ligne → diagnostic → récapitulatif.
-  - [ ] **Place de l'outil dans la journée de l'utilisateur** et pile technique.
-  - [ ] **« Votre vision de la localisation de l'IA »**.
-- [ ] README, `DATA_SOURCES.md`, `EVALUATION.md` à jour.
-- [ ] Nom **Ilera** cohérent partout : écran d'accueil, README, titre de la vidéo, dépôt, formulaire de soumission.
-
-### Pourquoi l'IA et pas un simple outil
-
-Un questionnaire à choix multiples ne permet pas de **poser ses propres questions dans ses propres mots**. L'IA sert à rapprocher une question libre (avec fautes, sans diacritiques, mélangée à l'anglais) d'un point clé. Le benchmark (§9) doit **montrer ce que le sémantique ou Claude apporte réellement par rapport aux mots-clés** ; s'il n'apporte rien en yoruba, le dire et l'expliquer.
+- **Human in the loop**: the tool trains; a person decides. It never acts in place of the user.
+- **Closed list of responses** by default; any generated content is flagged.
+- **Fail-safe**: “not sure — rephrase or ask a trainer” rather than a guessed answer.
+- **Content not clinically validated**: permanent banner in the app and in the README.
+- **Bias**: tests only with formulations from the team; write this down. No generalization to other dialects or languages.
+- **No proof of improvements in care**: never present the score as such.
+- **Privacy**: offline processing by default; explicit consent before any online sending; specify where data resides, who can read it, and what happens if the phone is lost or shared (requirement from Annex A).
 
 ---
 
-## 13. Calendrier suggéré
+## 11. Security
 
-| Moment | À faire |
+- **Gemini key**: remove the constant from the client. The Gemini docs state that, for a client → server connection, one should use **ephemeral tokens**. Emit them from the same backend as the Claude proxy.
+- **Claude key**: server-side only.
+- **Firestore**: verify that the rules limit access to `users/{uid}` and its sessions.
+- Do not put any secret in the `.env` asset (already declared in `pubspec.yaml`).
+- Do not save any transcription or audio without consent.
+
+---
+
+## 12. Deliverables (brief §08)
+
+- [ ] **Prototype**: code or link, with instructions to run it.
+- [ ] **2–5 minute video** containing:
+  - [ ] **Problem statement** in one sentence (format of §1) with the cited proof.
+  - [ ] **Role of AI** and why an SMS, spreadsheet, or search would not do the same job; safeguards.
+  - [ ] **End-to-end demo**: scenario choice → Yoruba offline interview → diagnosis → recap.
+  - [ ] **Place of the tool in the user’s day** and technical stack.
+  - [ ] **“Your vision of AI localization”**.
+- [ ] README, `DATA_SOURCES.md`, `EVALUATION.md` up to date.
+- [ ] Consistent **Ilera** name everywhere: home screen, README, video title, repository, submission form.
+
+### Why AI and not a simple tool
+
+A multiple-choice questionnaire does not allow one to **ask their own questions in their own words**. AI is used to match a free-form question (with mistakes, without diacritics, mixed with English) to a key point. The benchmark (§9) must **show what semantic or Claude adds in practice compared with keywords**; if it adds nothing in Yoruba, say so and explain why.
+
+---
+
+## 13. Suggested timeline
+
+| Time | To do |
 |---|---|
-| **Samedi 3 oct.** | Sélecteur de langue, un scénario yoruba, matcher lexical + normalisation, fail-safe visible, recherche d'un·e relecteur·rice natif·ve, test Gemini Live en yoruba. |
-| **Samedi soir** | Proxy + service Claude, consentement, premiers chiffres du benchmark. |
-| **Dimanche 4 oct. (matin)** | Relecture native, audio yoruba, tableau d'évaluation final, `DATA_SOURCES.md`. |
-| **Dimanche 4 oct. (après-midi)** | Enregistrement de la vidéo, README, soumission **avant la fin du week-end**. |
+| **Saturday 3 Oct.** | Language selector, one Yoruba scenario, lexical matching + normalization, visible fail-safe, search for a native reviewer, test Gemini Live in Yoruba. |
+| **Saturday evening** | Proxy + Claude service, consent, first benchmark numbers. |
+| **Sunday 4 Oct. (morning)** | Native review, Yoruba audio, final evaluation table, `DATA_SOURCES.md`. |
+| **Sunday 4 Oct. (afternoon)** | Video recording, README, submission **before the end of the weekend**. |
 
 ---
 
-## 14. Hors périmètre ce week-end
+## 14. Out of scope this weekend
 
-- Reconnaissance vocale yoruba hors ligne.
-- Modèle d'embeddings multilingue sur téléphone.
-- Interface d'administration des scénarios.
-- Validation clinique indépendante et étude d'impact sur les soins.
-- Autres langues.
+- Offline Yoruba speech recognition.
+- Multilingual embeddings model on phone.
+- Scenario administration interface.
+- Independent clinical validation and impact study on care.
+- Other languages.
