@@ -1,138 +1,110 @@
-# Évolution du projet — vers un vrai outil d'entraînement clinique
+# Feuille de route — Ilera
 
-Ce document complète le `README.md` d'origine (setup technique du hackathon).
-Il décrit où le projet en est après la phase de conception, ce qui a été
-tranché, et ce qu'il reste à construire. Toutes les décisions ci-dessous
-ont été prises en discussion, avec le contenu médical **à faire valider par
-une personne compétente avant tout usage réel**, y compris en entraînement.
+Ilera est un prototype de formation à l'entretien clinique. Il aide les
+apprenants à recueillir des informations, repérer les signes importants et
+choisir un diagnostic dans un scénario. Ce n'est pas un outil de diagnostic
+et il ne remplace ni l'encadrement clinique ni les protocoles locaux.
 
-## 1. Pourquoi ce document existe
+Cette feuille de route distingue les fonctions implémentées des validations
+qui restent à faire. Voir [TODO.md](TODO.md) pour la liste d'actions détaillée.
 
-Le prototype de hackathon (voir `ProjectGOAL.md`) simulait une conversation
-avec un patient virtuel, mais ne vérifiait jamais si l'agent tirait la
-bonne conclusion de cette conversation. Une discussion agréable qui rate
-tous les signaux d'alerte passait pour un succès. Ce n'est plus le cas :
-l'objectif est maintenant de fermer la boucle complète **recueillir
-l'information → la synthétiser → décider**, comme un vrai entretien
-clinique.
+## Parcours actuel
 
-## 2. Ce que l'agent fait maintenant, du début à la fin
+1. L'apprenant choisit un scénario intégré.
+2. Il interroge le patient simulé via Gemini Live ou en mode hors ligne.
+3. En mode hors ligne, le patient renvoie des répliques rédigées à l'avance ;
+   il ne génère pas de nouvelles réponses.
+4. L'apprenant sélectionne un diagnostic dans une liste à choix multiples.
+5. L'application affiche les points abordés, le résultat du diagnostic, les
+   informations pédagogiques et le score, puis tente d'enregistrer la session
+   dans Firebase.
 
-1. Il choisit un scénario, présenté par une situation neutre (le diagnostic
-   n'est jamais donné dans le titre ni la description affichés).
-2. Il mène l'interrogatoire, en Live (voix naturelle), en mode léger (texte
-   + voix native), ou hors ligne (texte/voix, sans réseau).
-3. Le patient ne révèle un signe important **que si la bonne question est
-   posée** — c'est le principe déjà en place, inchangé.
-4. Une fois l'entretien terminé, l'agent appuie sur **« Poser mon
-   diagnostic »**, choisit une réponse parmi une liste à choix multiples
-   (le bon diagnostic + 2-3 distracteurs plausibles).
-5. Une page de récapitulatif s'affiche : les questions pertinentes posées,
-   les signaux d'alerte donnés par le patient et leur explication, le bon
-   diagnostic, les symptômes typiques de la maladie, la conduite à tenir,
-   et un score final.
+## Fonctionnalités implémentées
 
-## 3. Décisions actées
+### Conversation et sélection des réponses
 
-| Sujet | Décision |
-|---|---|
-| Étape diagnostic | Écran dédié à choix multiples, ouvert depuis un bouton sur l'écran de conversation, suivi d'un écran de récapitulatif complet |
-| Score | 60 % sur les points clés couverts pendant l'entretien (les points critiques comptant double), 40 % sur le diagnostic choisi (tout ou rien) |
-| Voix hors ligne | Pas de moteur TTS embarqué. Chaque réplique du patient hors-ligne est un fichier audio pré-enregistré (TTS cloud one-shot ou voix humaine), puisque les réponses hors-ligne sont un ensemble fermé de phrases connues à l'avance |
-| Mode hors-ligne | Conversation en lecture/écriture (texte ou voix, au choix de l'agent), avec un arbre à mots-clés (`OfflinePatientBrain`, déjà construit) qui débloque les répliques et les signaux d'alerte |
-| Connexion | Firebase Auth anonyme dès le premier lancement (fonctionne hors-ligne après la création initiale), avec liaison optionnelle à un email/mot de passe plus tard pour récupérer sa progression sur un autre appareil |
-| Scénarios | Un socle de scénarios embarqué dans l'app dès l'installation ; à la connexion, l'app vérifie sur Firestore s'il existe de nouveaux scénarios non présents localement et les ajoute |
-| Ajout de contenu | Se fait pour l'instant directement depuis la console Firebase (pas d'écran d'administration dans l'app pour ce MVP) |
+- Gemini Live fournit le parcours de conversation en ligne et en temps réel.
+- Le mode hors ligne utilise un scénario local et des répliques préécrites.
+- En anglais, le modèle d'embeddings Gecko aide à faire correspondre une
+  question à une réplique existante. Les mots-clés explicites restent
+  prioritaires ; le matching par mots-clés sert aussi de secours si Gecko est
+  indisponible ou hésite.
+- En yorùbá, la sélection des réponses repose sur les mots-clés, avec
+  normalisation du texte et abstention lorsque le système ne peut pas choisir
+  de façon suffisamment sûre. Gecko n'est pas utilisé en yorùbá.
+- Le modèle d'embeddings sélectionne une réplique écrite ; il ne génère pas
+  le texte du patient.
 
-## 4. Contenu médical proposé (à valider)
+### Reconnaissance vocale et audio
 
-Chaque scénario a maintenant une fiche complète : titre neutre affiché à
-l'agent, diagnostic correct, distracteurs, signaux d'alerte avec leur
-cause, symptômes typiques, conduite à tenir.
+- La saisie vocale hors ligne sur les plateformes natives utilise le modèle
+  multilingue Whisper `tiny` en anglais et en yorùbá. Le modèle est téléchargé
+  lors de la première utilisation, sa progression est affichée et le fichier
+  installé est réutilisé.
+- L'enregistrement utilisé pour la transcription est temporaire, puis
+  supprimé. Whisper transcrit sur l'appareil. Cette fonction est distincte de
+  Gemini Live, qui transmet l'audio de conversation au service en ligne.
+- Les réponses patient yorùbá ont des chemins d'assets dédiés. Les 26 fichiers
+  MP3 attendus sont présents dans le dépôt. Leur lecture, prononciation,
+  provenance et droits de distribution restent à vérifier par des personnes.
+- Un enregistrement yorùbá manquant ne déclenche pas silencieusement une voix
+  anglaise.
 
-### Fièvre chez un enfant
-- **Titre affiché :** *Un enfant fébrile depuis deux jours*
-- **Diagnostic :** Suspicion de paludisme
-- **Distracteurs :** Angine virale banale · Otite · Poussée dentaire
-- **Signaux d'alerte :** moustiquaire trouée (exposition), voyage récent en
-  zone marécageuse (zone à risque), léthargie/enfant très mou (signe de
-  gravité)
-- **Conduite à tenir :** orientation vers un centre de santé pour test
-  rapide ; urgence si torpeur, convulsions ou refus de boire
+### Scénarios, évaluation et persistance
 
-### Saignement post-partum
-- **Titre affiché :** *Une jeune mère inquiète, 5 jours après l'accouchement*
-- **Diagnostic :** Suspicion d'endométrite (infection utérine du
-  post-partum)
-- **Distracteurs :** Simples suites de couches normales · Hémorroïdes ·
-  Infection urinaire
-- **Signaux d'alerte :** odeur inhabituelle des pertes, fièvre associée,
-  douleur pelvienne
-- **Conduite à tenir :** orientation urgente pour antibiothérapie ;
-  saignement abondant + fièvre = signal à ne jamais minimiser
+- Trois scénarios hors ligne intégrés sont disponibles en anglais et en
+  yorùbá.
+- La sélection du diagnostic et le récapitulatif pédagogique sont implémentés.
+- L'authentification Firebase, les profils, le catalogue de scénarios,
+  l'enregistrement des scores de session et les vues de progression sont
+  présents.
+- Le README principal et l'inventaire des audios yorùbá décrivent le
+  fonctionnement actuel de Whisper et du modèle d'embeddings hors ligne.
 
-### Déshydratation
-- **Titre affiché :** *Un agriculteur épuisé après une journée au champ*
-- **Diagnostic :** Déshydratation / épuisement dû à la chaleur
-- **Distracteurs :** Simple fatigue musculaire · Hypoglycémie · Début de
-  grippe
-- **Signaux d'alerte :** absence d'urine depuis le matin, crampes et
-  vertiges
-- **Conduite à tenir :** mise à l'ombre, réhydratation immédiate, repos ;
-  urgence si confusion ou absence de transpiration malgré la chaleur
-  (suspicion de coup de chaleur)
+## Prochaine étape : valider le parcours sur les appareils cibles
 
-## 5. Ce qu'il reste à construire
+La priorité est maintenant la vérification, plutôt que l'ajout de nouvelles
+fonctionnalités :
 
-### Contenu et données
-- [ ] Valider le contenu médical ci-dessus avec une personne compétente
-- [ ] Étendre le modèle `PatientScenario` : ajouter diagnostic correct,
-      liste de distracteurs, signaux d'alerte structurés, symptômes,
-      conduite à tenir (au-delà du simple `systemPrompt` actuel)
-- [ ] Écrire le texte des ~9-10 répliques par personnage nécessaires au
-      mode hors-ligne (déjà en grande partie fait dans
-      `offline_scenarios.dart`)
+1. Tester une session complète hors ligne après téléchargement de Gecko et
+   Whisper, y compris après redémarrage à froid et en mode avion.
+2. Mesurer la transcription Whisper en anglais et en yorùbá sur des appareils
+   Android/iOS cibles ; vérifier les permissions, le téléchargement et sa
+   réutilisation, les erreurs et les performances.
+3. Réévaluer le matching Gecko sur appareil. Une exécution antérieure sur un
+   Samsung SM-A055F rapportait 44 cas réussis sur 51 ; reproduire la mesure et
+   étudier les échecs de paraphrase et de répétition.
+4. Écouter les 26 enregistrements yorùbá et les comparer à leurs scripts ;
+   confirmer la provenance des voix et l'autorisation de distribuer les
+   fichiers.
+5. Faire relire les diagnostics, signes d'alerte et conseils par des
+   professionnels de santé. Faire relire les traductions et formulations
+   yorùbá par des locuteurs de cette langue.
+6. Vérifier les règles d'accès Firestore, les restrictions de la clé Gemini et
+   les informations fournies sur les données avant toute distribution.
 
-### Audio hors-ligne
-- [ ] Choisir la méthode de production (TTS cloud one-shot ou
-      enregistrement humain)
-- [ ] Générer/enregistrer les fichiers, nommés par
-      `assets/audio/offline/<personnage>/<id_point_clé>.m4a`
-- [ ] Service de lecture avec repli sur `flutter_tts` si un fichier manque
+Les cas de test, critères d'acceptation et tâches en attente sont détaillés
+dans [TODO.md](TODO.md). Les petits résultats de benchmark existants sont des
+vérifications de développement, pas une mesure de précision représentative ni
+une preuve d'efficacité clinique.
 
-### Écrans
-- [ ] Écran « Poser mon diagnostic » (liste à choix multiples)
-- [ ] Écran de récapitulatif (questions posées, signaux d'alerte,
-      diagnostic, symptômes, conduite à tenir, score)
-- [ ] Adapter le feedback des modes Live/léger pour que Gemini juge aussi
-      le diagnostic formulé librement par l'agent, avec la même grille que
-      le mode hors-ligne
+## Évolutions ultérieures
 
-### Firebase
-- [ ] Créer le projet Firebase (apps Android + iOS)
-- [ ] Ajouter `firebase_core`, `firebase_auth`, `cloud_firestore`
-- [ ] Authentification anonyme + flux de liaison à un compte email/mot de
-      passe
-- [ ] Modèle de données : profil utilisateur, historique de sessions
-      (scénario, score, date, mode utilisé)
-- [ ] Règles de sécurité Firestore (chacun ne lit/écrit que ses propres
-      scores ; contenu des scénarios public en lecture)
-- [ ] Logique de synchronisation : scénarios embarqués + détection des
-      nouveaux scénarios disponibles en ligne, ajout à la base locale
+À envisager après les validations sur appareils et les relectures humaines :
 
-### Stockage local
-- [ ] Choisir `sqflite` ou `Hive` pour la persistance locale des scénarios
-      téléchargés et des sessions en attente de synchronisation
-- [ ] File d'attente des scores faits hors-ligne, envoyée dès le retour de
-      connexion
+- Étendre l'évaluation avec des formulations anglaises et yorùbá recueillies
+  auprès d'utilisateurs, en séparant les mesures de reconnaissance vocale et
+  de sélection de réponse.
+- Améliorer le débrief et ajouter un parcours pour refaire un cas si les
+  essais avec les apprenants le justifient.
+- Versionner et valider le contenu des scénarios gérés à distance.
+- Étudier des outils formateur ou d'autres langues/scénarios selon les besoins
+  validés.
 
-## 6. Ce qui ne change pas
+## Statut de validation clinique et linguistique
 
-- Les trois paliers de conversation (Live / léger / hors-ligne) restent
-  tels quels.
-- `OfflinePatientBrain` et son système de mots-clés ne changent pas de
-  logique, ils gagnent seulement une voix pré-enregistrée à la place de la
-  synthèse en direct.
-- Le principe central reste inchangé : le patient ne donne jamais son
-  diagnostic lui-même, et ne révèle un signe important que si la bonne
-  question est posée.
+Les scénarios cliniques et le contenu yorùbá intégrés sont illustratifs et
+doivent être relus avant usage en formation. Ne pas présenter les cas, les
+traductions, les enregistrements ou les scores de modèle comme validés par des
+professionnels. Conserver l'avertissement de brouillon dans l'application
+jusqu'à ce que les validations nécessaires aient été effectuées et consignées.

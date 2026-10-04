@@ -1,8 +1,52 @@
 # AI Healthcare Simulation App
 
-A Flutter application for practicing clinical interviews with simulated
-patients. It is intended for training and practice; it is not a diagnostic
-tool and does not replace clinical supervision or local medical protocols.
+## Context and problem
+
+Noor's story captures a frontline-care challenge: the clinic is nearby, but
+it is overcrowded; health workers face heavy caseloads, limited time with each
+patient, demanding records, and guidance that may not always be current. In
+remote catchments, clinician shortages, distance to care, limited on-site
+diagnostics, and low digital literacy can add further barriers.
+
+Community health workers are often the first point of contact for people like
+Noor. Supporting them means more than providing information: they need
+opportunities to refresh their knowledge, practise the expected professional
+attitude, ask respectful and relevant questions, recognize warning signs, and
+know when to refer a patient or seek supervision.
+
+Ilera is designed to support this ongoing learning. It offers repeatable,
+scenario-based practice in which learners interview a simulated patient,
+identify important signs, choose a diagnosis, and receive a score and
+learning summary. The scenarios can be reviewed and updated as training
+requirements and local guidance evolve. Offline conversation and on-device
+speech recognition are designed to make practice available even when
+connectivity is limited. Ilera aims to strengthen the preparation of
+frontline health workers; it does not diagnose Noor or replace official
+guidance, supervision, or care.
+
+The WHO African Region's 2026 health workforce report summarizes studies in
+which providers made a correct diagnosis in about 62% of cases and provided
+guideline-concordant treatment in about 40%. It also estimates that the
+Region has 46% of the health workers it needs and projects a shortfall of
+5.85 million by 2030. Separately, the [GSMA State of Mobile Internet
+Connectivity 2024 report](https://www.gsma.com/newsroom/press-release/new-gsma-report-shows-mobile-internet-connectivity-continues-to-grow-globally-but-barriers-for-3-45-billion-unconnected-people-remain/)
+reports that at the end of 2023, 27% of the population in Sub-Saharan Africa
+used mobile internet, alongside a 60% usage gap.
+
+These regional figures describe providers and populations across diverse
+settings; they are not specific to community health workers, Yoruba-speaking
+learners, or Noor's location. They motivate the challenge, but do not by
+themselves demonstrate Ilera's impact. Sources, dates, definitions, and
+limitations are documented in [`data.md`](data.md).
+
+## About Ilera
+
+A Flutter learning application for community and frontline health workers.
+Through simulated patient interviews, it supports continued practice in
+clinical reasoning, communication, recognizing warning signs, and selecting
+an appropriate next step. Reviewed scenario content can be refreshed as
+requirements change. Ilera is a training aid, not a diagnostic tool or a
+replacement for official guidance, clinical supervision, or local protocols.
 
 ## Features
 
@@ -20,6 +64,22 @@ tool and does not replace clinical supervision or local medical protocols.
 - Firebase authentication, scenario synchronization, and session-score
   persistence.
 
+## Device and download requirements
+
+Offline practice needs internet **once** to download the models. The sizes
+below have not all been measured yet.
+
+| Component | Needed for | Size | Notes |
+|---|---|---|---|
+| App package | Everything | _To measure_ | Android debug build size is not representative. |
+| Whisper `tiny` (multilingual) | Offline speech input | _To measure_ | Downloaded on first microphone use; progress is shown. |
+| Gecko 110M quantized | Semantic matching (English only) | About 115 MB (_to confirm on device_) | Downloaded separately; keyword matching is used if unavailable. |
+| Yorùbá prerecorded audio | Spoken patient replies | _To measure_ | Some files may still be missing; see the audio inventory. |
+
+Side-loading models and resuming interrupted downloads are not yet documented
+here. On a slow or metered connection, the first download may be costly, so
+this is a limit for the settings described above.
+
 ## Conversation modes
 
 | Mode | Patient responses and selection | Speech input | Network use |
@@ -32,6 +92,21 @@ question-matching data. The local patient does not invent new responses. In
 English, semantic matching is applied only when the embedding model and its
 native runtime are available; otherwise, and for Yorùbá, the app uses keyword
 matching.
+
+### When the app is not sure
+
+The offline patient says only what the scenario authors wrote. If a question
+does not match any authored reply, the app should say so instead of guessing,
+and invite the learner to rephrase or ask a supervisor.
+
+> **TODO before submission:** confirm this against `OfflinePatientBrain` and
+> the simulation screen, then replace this note with the exact on-screen
+> message in English and Yorùbá (reviewed by a native speaker). If the code
+> currently returns a default in-character reply instead, either change the
+> behavior or describe it here accurately.
+
+In Live mode, replies are generated by Gemini and can be wrong or invented.
+Treat Live conversations as practice, not as a source of clinical facts.
 
 ### Offline Whisper speech recognition
 
@@ -138,6 +213,22 @@ After connecting, the anonymous account can be linked to an email account.
 Signing in to a different account switches the active account; anonymous
 progress is not automatically merged into an existing account.
 
+### Who can read the data, and lost or shared phones
+
+- **Cloud data.** Access to Firestore data is governed by the project's
+  security rules.
+  > **TODO before submission:** confirm that the rules limit `users/{uid}` and
+  > its sessions to the signed-in owner, and document the result here.
+- **On the device.** Locally cached scenarios and score summaries are kept in
+  `SharedPreferences`. Anyone who can open the app on an unlocked phone can see
+  the signed-in user's progress and profile (name and optional photo). Use a
+  screen lock on shared phones.
+- **No transcripts, no stored audio.** Interview transcripts are not saved,
+  and the temporary offline recording is deleted after transcription. In Live
+  mode, audio is sent to Gemini, so avoid real patient information.
+- **No real patient data.** Ilera is designed for simulated patients. Do not
+  enter information about real people.
+
 Scenarios are currently managed through the Firestore `scenarios` collection;
 the app does not include an administration screen. The expected data shape is
 defined by `ScenarioBundle` in `lib/models/scenario_bundle.dart`.
@@ -167,7 +258,7 @@ flutter pub get
 The current development setup reads `geminiApiKey` from `lib/main.dart`.
 Replace the placeholder with a key from
 [Google AI Studio](https://aistudio.google.com/apikey) to test Gemini
-features.
+features. **Do not commit your real key to the public repository.**
 
 The `.env` file is not loaded by the current application code, even though it
 is listed as an asset. Do not put production secrets in an asset or in a
@@ -217,19 +308,29 @@ not generate or synthesize the patient's voice.
 
 ## Current limitations
 
+- **Not evaluated with real users.** Ilera has not been tested with health
+  workers, and its effect on clinical skills or care has not been measured.
+- **Scenario content is not clinically validated.** It needs review by local
+  clinicians and Yorùbá speakers.
+- **Yorùbá speech recognition is unevaluated.** Whisper `tiny`'s transcription
+  quality for Yorùbá, especially in noisy environments, has not yet been
+  tested with speakers on target devices. Text input and prerecorded audio do
+  not depend on it.
 - Offline dialogue is limited to scenarios with a local dialogue definition;
   it is not an open-ended generative patient.
 - Whisper speech input requires a native target, microphone permission, and a
-  one-time model download. The multilingual `tiny` model's recognition
-  quality, especially for Yorùbá and noisy environments, should be evaluated
-  with speakers on target devices.
-- Gecko semantic matching has separate download and native-runtime
-  requirements. Keyword matching is the fallback when semantic matching is
-  unavailable.
+  one-time model download.
+- Gecko semantic matching is English-only and has separate download and
+  native-runtime requirements. Keyword matching is the fallback when semantic
+  matching is unavailable, and it is the only method used for Yorùbá.
 - Some Yorùbá prerecorded audio files may still need to be recorded and added;
   consult the inventory for the required filenames and scripts.
 - Firestore scenarios require a compatible offline dialogue definition before
   they can be used in the offline conversation mode.
+- Download sizes, memory use, latency, and battery consumption on target
+  devices have not been measured (see the requirements table above).
+- Live mode depends on Gemini's language support for Yorùbá, which has not
+  been validated with native speakers.
 - The application is a training aid, not a clinical decision-support or
   diagnostic system.
 
@@ -242,12 +343,15 @@ not generate or synthesize the patient's voice.
 3. Test Whisper's English and Yorùbá transcription quality on representative
    Android and iOS devices, including low-end devices and noisy settings.
 4. Measure offline model download size, memory use, latency, and battery
-   consumption on target devices.
+   consumption on target devices, and fill in the requirements table.
 5. Keep the offline scenario and keyword fallback usable on devices where
    optional native models are unavailable.
+6. Compare keyword matching and Gecko matching on a held-out set of questions
+   and report the results, including errors.
 
 ## Project documentation
 
+- [Data sources and limitations](data.md)
 - [Project goals](ProjectGOAL.md)
 - [Roadmap and product decisions](ROADMAP.md)
 - [Design notes](Design.md)
