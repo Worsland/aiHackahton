@@ -96,7 +96,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
 
   /// Mode "voix naturelle" : conversation en temps réel via Gemini Live.
   late final GeminiLiveService _live = GeminiLiveService(
-    apiKey: widget.geminiService.apiKey,
+    backendUrl: widget.geminiService.backendUrl,
   );
 
   /// Le mode "naturel" (Gemini Live, ancien bool `_liveMode = true`) reste
@@ -148,6 +148,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
     ScenarioCatalog.instance.removeListener(_onCatalogChanged);
     _live.removeListener(_onLiveChanged);
     _live.dispose();
+    widget.geminiService.dispose();
     _voice.dispose();
     unawaited(_offlineVoice.dispose());
     _typedController.dispose();

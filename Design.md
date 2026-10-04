@@ -1,7 +1,8 @@
 # Refonte design — ce qui a changé
 
 ## Services (fournis par l'équipe, non modifiés)
-- `lib/services/gemini_service.dart` — via `google_generative_ai`.
+- `lib/services/gemini_service.dart` — authenticated requests to the Gemini
+  proxy; the provider key is server-side only.
 - `lib/services/patient_scenario.dart` — titre/description/systemPrompt
   uniquement (pas d'icône ni de difficulté : c'est purement de l'UI, voir
   `_ScenarioVisuals` dans `simulation_screen.dart`, qui mappe le titre à une
@@ -21,14 +22,14 @@
   dégradé + cartes avec badge de difficulté) et écran de simulation (avatar
   en haut, bulles de chat asymétriques, bouton micro circulaire animé,
   feedback en carte dédiée).
-- `lib/main.dart` — applique le thème, écran "clé manquante" restylé.
+- `lib/main.dart` — applies the theme and reads the proxy URL from a
+  `--dart-define`, never a provider key.
 
 ## À ajouter dans `pubspec.yaml`
 ```yaml
 dependencies:
   flutter:
     sdk: flutter
-  google_generative_ai: ^0.4.6
   speech_to_text: ^7.0.0
   flutter_tts: ^4.0.0
   permission_handler: ^11.3.0

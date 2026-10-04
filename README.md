@@ -51,7 +51,9 @@ replacement for official guidance, clinical supervision, or local protocols.
 ## Features
 
 - Built-in fever, postpartum bleeding, and dehydration scenarios.
-- Online conversations with a patient powered by Gemini Live.
+- Online conversations with a patient powered by Gemini Live through an
+  authenticated server-side proxy. The proxy keeps the provider key out of
+  the app and enforces a shared three-minute quota.
 - A structured offline conversation mode that follows a local dialogue tree
   and can match questions using on-device text embeddings, with a keyword
   fallback when the embedding runtime is unavailable.
@@ -200,11 +202,13 @@ The repository's Firebase configuration currently targets the
 | Firestore `scenarios` collection | Downloadable scenario definitions, prompts, difficulty, key points, responses, and clinical notes. |
 | Firestore `users/{uid}` document | User profile, including name and an optional base64-encoded photo. |
 | Firestore `users/{uid}/sessions` subcollection | Scenario, mode, score, diagnosis outcome, key points covered, and date. |
+| Firestore `iaUsage/global` document | Server-maintained shared Gemini usage and remaining-time budget. |
+| Firestore `iaUsageLocks/global` document | Private server-only lock for serializing Gemini sessions. |
 | `SharedPreferences` | Local cache of synchronized scenarios and score summaries. |
 
 The complete interview transcript is not saved in a session record. In Live
-mode, microphone audio is sent to Gemini for the conversation. Offline Whisper
-transcription is performed on-device; its temporary recording is deleted
+mode, microphone audio is sent through the Gemini proxy for the conversation.
+Offline Whisper transcription is performed on-device; its temporary recording is deleted
 after transcription. Profile and score data can still synchronize with
 Firebase when connectivity is available.
 
@@ -253,17 +257,14 @@ Run from the repository root:
 flutter pub get
 ```
 
-### Configure Gemini
+### Configure Gemini safely
 
-The current development setup reads `geminiApiKey` from `lib/main.dart`.
-Replace the placeholder with a key from
-[Google AI Studio](https://aistudio.google.com/apikey) to test Gemini
-features. **Do not commit your real key to the public repository.**
-
-The `.env` file is not loaded by the current application code, even though it
-is listed as an asset. Do not put production secrets in an asset or in a
-distributed client: bundled values can be extracted. A production deployment
-should proxy Gemini requests through a backend and restrict the key.
+Online text and Live audio use the authenticated Cloud Run proxy in
+[`server/`](server/). The provider key belongs in Secret Manager, not in
+Firestore, `.env`, a Flutter asset, source code, or a build define. The proxy
+enforces a shared three-minute allowance in Firestore. See the
+[Gemini proxy deployment guide](docs/gemini-proxy.md) for setup, rules, and
+Firebase Hosting deployment.
 
 ### Configure Firebase
 

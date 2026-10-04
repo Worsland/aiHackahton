@@ -14,7 +14,7 @@ import 'services/scenario_score_board.dart';
 import 'screens/simulation_screen.dart';
 import 'theme/app_theme.dart';
 
-const geminiApiKey = 'colle_ta_cle_ici';
+const geminiBackendUrl = String.fromEnvironment('ILERA_AI_BACKEND_URL');
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -82,56 +82,7 @@ class HackathonApp extends StatelessWidget {
       title: 'Ilera',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
-      home: geminiApiKey.isEmpty
-          ? const _MissingKeyScreen()
-          : SimulationScreen(geminiService: GeminiService(geminiApiKey)),
-    );
-  }
-}
-
-class _MissingKeyScreen extends StatelessWidget {
-  const _MissingKeyScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: AppColors.secondary.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.key_off_rounded,
-                  color: AppColors.secondary,
-                  size: 34,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Clé Gemini manquante',
-                style: Theme.of(context).textTheme.titleLarge,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Ajoute ta clé GEMINI_API_KEY dans main.dart pour démarrer '
-                'une simulation avec un patient virtuel.',
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
+      home: SimulationScreen(geminiService: GeminiService(geminiBackendUrl)),
     );
   }
 }

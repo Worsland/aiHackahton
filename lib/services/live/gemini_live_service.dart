@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:math' as math;
-import 'dart:typed_data';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -35,15 +35,11 @@ typedef LiveTurnCallback = void Function(String text, {required bool isAgent});
 /// Les changements d'état discrets passent par [notifyListeners] ;
 /// [mouthLevel] est un ValueNotifier à part car il change ~25 fois/s.
 class GeminiLiveService extends ChangeNotifier {
-  GeminiLiveService({required this.apiKey, this.model = defaultModel});
+  GeminiLiveService({required this.backendUrl, this.model = defaultModel});
 
   /// Modèle Live stable en septembre 2026. Le nom change vite : c'est le
   /// premier endroit à vérifier si la connexion est refusée.
   static const defaultModel = 'gemini-3.8-live';
-
-  static const _wsBase =
-      'wss://generativelanguage.googleapis.com/ws/'
-      'google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent';
 
   static const _playbackRate = 24000; // Hz, sortie de Gemini
   static const _speechThreshold = 0.02; // RMS micro au-dessus = l'agent parle
@@ -62,7 +58,7 @@ VOICE RULES (follow at all times):
   question being asked calls for it.
 ''';
 
-  final String apiKey;
+  final String backendUrl;
   final String model;
 
   /// Reçoit chaque tour de parole terminé (agent ou patient).
@@ -140,9 +136,28 @@ VOICE RULES (follow at all times):
     _setupDone = setupDone;
 
     try {
+      final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
+      if (idToken == null) {
+        throw StateError('Sign in before starting an online conversation.');
+      }
+      if (backendUrl.isEmpty) {
+        throw StateError(
+          'The Gemini server is not configured. Switch to offline practice.',
+        );
+      }
       await _player.setup(sampleRate: _playbackRate);
 
-      final channel = WebSocketChannel.connect(Uri.parse('$_wsBase?key=$apiKey'));
+      final backend = Uri.parse(backendUrl);
+      final uri = backend.replace(
+        scheme: backend.scheme == 'http' ? 'ws' : 'wss',
+        path: '/live',
+        query: null,
+        fragment: null,
+      );
+      final channel = WebSocketChannel.connect(
+        uri,
+        protocols: ['ilera-live-v1', 'firebase-auth.$idToken'],
+      );
       _ws = channel;
       await channel.ready;
 
@@ -156,11 +171,16 @@ VOICE RULES (follow at all times):
       await setupDone.future.timeout(const Duration(seconds: 10));
 
       await _mic.start(_onMicChunk);
-      _ticker = Timer.periodic(const Duration(milliseconds: 40), (_) => _tick());
+      _ticker = Timer.periodic(
+        const Duration(milliseconds: 40),
+        (_) => _tick(),
+      );
       _setState(LiveState.live);
       return true;
     } on TimeoutException {
-      _fail('The patient is not responding (timed out). Check your connection.');
+      _fail(
+        'The patient is not responding (timed out). Check your connection.',
+      );
     } catch (e) {
       _fail('Could not start the conversation: $e');
     }
